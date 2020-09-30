@@ -1,16 +1,24 @@
+import org.apache.commons.io.IOUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.time.*;
 
 class Kalender {
 
-    public static void main(String[] args) {
+    public static void main(String[] args)throws JSONException, MalformedURLException, IOException {
         Scanner reader = new Scanner(System.in);
         List<LocalDate> Feiertage = new ArrayList<>();
         int jahre = 1;
         int montag = 0, dienstag = 0, mittwoch = 0, donnerstag = 0, freitag = 0, samstag = 0, sonntag = 0;
         int startjahr, endjahr;
-
+        JSONObject json = new JSONObject(IOUtils.toString(new URL("https://feiertage-api.de/api/?jahr=2019"), Charset.forName("UTF-8")));
 
         System.out.print("Startjahr: ");
         startjahr = reader.nextInt();
@@ -69,5 +77,11 @@ class Kalender {
         System.out.println("Freitage: " + fr);
         System.out.println("Samstage: " + sa);
         System.out.println("Sonntage: " + so);
+    }
+
+    private static int getWert(JSONObject json, String key) {
+        JSONObject bestaetigt = (JSONObject) json.get(key);
+        int anzahl = bestaetigt.getInt("value");
+        return anzahl;
     }
 }
