@@ -11,7 +11,6 @@ import java.util.*;
 import java.time.*;
 
 class Kalender {
-    private static final String URL = "https://feiertage-api.de/api/?jahr=2020&nur_land=BY";
     public static void main(String[] args)throws JSONException, MalformedURLException, IOException {
         Scanner reader = new Scanner(System.in);
         List<LocalDate> Feiertage = new ArrayList<>();
