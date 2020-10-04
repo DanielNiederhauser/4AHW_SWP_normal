@@ -11,14 +11,22 @@ import java.util.*;
 import java.time.*;
 
 class Kalender {
-
+    private static final String URL = "https://feiertage-api.de/api/?jahr=2020&nur_land=BY";
     public static void main(String[] args)throws JSONException, MalformedURLException, IOException {
         Scanner reader = new Scanner(System.in);
         List<LocalDate> Feiertage = new ArrayList<>();
         int jahre = 1;
         int montag = 0, dienstag = 0, mittwoch = 0, donnerstag = 0, freitag = 0, samstag = 0, sonntag = 0;
         int startjahr, endjahr;
-        JSONObject json = new JSONObject(IOUtils.toString(new URL("https://feiertage-api.de/api/?jahr=2019"), Charset.forName("UTF-8")));
+
+
+        List<String> dynamischeFeiertage = new ArrayList<>();
+        dynamischeFeiertage.add("Christi Himmelfahrt");
+        dynamischeFeiertage.add("Ostermontag");
+        dynamischeFeiertage.add("Fronleichnam");
+        dynamischeFeiertage.add("Pfingstmontag");
+        List<String> alleDynamischen = new ArrayList<>();
+
 
         System.out.print("Startjahr: ");
         startjahr = reader.nextInt();
@@ -26,7 +34,24 @@ class Kalender {
 
         System.out.print("Endjahr (inklusive): ");
         endjahr = reader.nextInt();
+        for (int i = startjahr; i <= endjahr; i++) {
+            JSONObject json = new JSONObject(IOUtils.toString(new URL("https://feiertage-api.de/api/?jahr=" + i + "&nur_land=BY"), Charset.forName("UTF-8")));
+            List<String> tage = getWert(json,dynamischeFeiertage);
+            for (int j =0;j<tage.size();j++){
+                alleDynamischen.add(tage.get(j));
+            }
+
+        }
+        System.out.println("Anzahl bestätigte Personen: " + alleDynamischen);
         feiertageGenerieren(Feiertage, startjahr, endjahr);
+
+        for (int i=0;i<alleDynamischen.size();i++){
+            LocalDate localDate = LocalDate.parse(alleDynamischen.get(i));
+            Feiertage.add(localDate);
+        }
+
+
+
 
         for (int i = 0; i < Feiertage.size(); i++) {
 
@@ -79,9 +104,15 @@ class Kalender {
         System.out.println("Sonntage: " + so);
     }
 
-    private static int getWert(JSONObject json, String key) {
-        JSONObject bestaetigt = (JSONObject) json.get(key);
-        int anzahl = bestaetigt.getInt("value");
+    private static List<String> getWert(JSONObject json, List<String> keys) {
+
+        List<String> anzahl = new ArrayList<>();
+        for(int i = 0; i< keys.size();i++) {
+            JSONObject bestaetigt = (JSONObject) json.get(keys.get(i));
+            anzahl.add( bestaetigt.getString("datum"));
+
+        }
         return anzahl;
     }
+
 }

@@ -2,7 +2,8 @@
   <library name="commons-io-2.8.0">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/../Libraries/commons-io-2.8.0/commons-io-2.8.0.jar!/" />
-      <root url="jar://$PROJECT_DIR$/../Libraries/json-20200518.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../libraries/json-20200518.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../libraries/commons-io-2.8.0 (1).jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
