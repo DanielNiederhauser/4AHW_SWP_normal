@@ -14,10 +14,8 @@ class Kalender {
     public static void main(String[] args)throws JSONException, MalformedURLException, IOException {
         Scanner reader = new Scanner(System.in);
         List<LocalDate> Feiertage = new ArrayList<>();
-        int jahre = 1;
         int montag = 0, dienstag = 0, mittwoch = 0, donnerstag = 0, freitag = 0, samstag = 0, sonntag = 0;
         int startjahr, endjahr;
-
 
         List<String> dynamischeFeiertage = new ArrayList<>();
         dynamischeFeiertage.add("Christi Himmelfahrt");
@@ -26,10 +24,8 @@ class Kalender {
         dynamischeFeiertage.add("Pfingstmontag");
         List<String> alleDynamischen = new ArrayList<>();
 
-
         System.out.print("Startjahr: ");
         startjahr = reader.nextInt();
-
 
         System.out.print("Endjahr (inklusive): ");
         endjahr = reader.nextInt();
@@ -41,16 +37,12 @@ class Kalender {
             }
 
         }
-        System.out.println("Anzahl bestätigte Personen: " + alleDynamischen);
         feiertageGenerieren(Feiertage, startjahr, endjahr);
 
         for (int i=0;i<alleDynamischen.size();i++){
             LocalDate localDate = LocalDate.parse(alleDynamischen.get(i));
             Feiertage.add(localDate);
         }
-
-
-
 
         for (int i = 0; i < Feiertage.size(); i++) {
 
