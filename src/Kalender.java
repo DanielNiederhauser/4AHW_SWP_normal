@@ -17,6 +17,15 @@ class Kalender {
         int montag = 0, dienstag = 0, mittwoch = 0, donnerstag = 0, freitag = 0, samstag = 0, sonntag = 0;
         int startjahr, endjahr;
 
+        List<LocalDate> montage = new ArrayList<>();
+        List<LocalDate> dienstage = new ArrayList<>();
+        List<LocalDate> mittwoche = new ArrayList<>();
+        List<LocalDate> donnerstage = new ArrayList<>();
+        List<LocalDate> freitage = new ArrayList<>();
+        List<LocalDate> samstage = new ArrayList<>();
+        List<LocalDate> sonntage = new ArrayList<>();
+
+
         List<String> dynamischeFeiertage = new ArrayList<>();
         dynamischeFeiertage.add("Christi Himmelfahrt");
         dynamischeFeiertage.add("Ostermontag");
@@ -47,28 +56,36 @@ class Kalender {
         for (int i = 0; i < Feiertage.size(); i++) {
 
             if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.MONDAY)) {
+                montage.add(Feiertage.get(i));
                 montag++;
             }
             if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.TUESDAY)) {
+                dienstage.add(Feiertage.get(i));
                 dienstag++;
             }
             if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.WEDNESDAY)) {
+                mittwoche.add(Feiertage.get(i));
                 mittwoch++;
             }
             if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.THURSDAY)) {
+                donnerstage.add(Feiertage.get(i));
                 donnerstag++;
             }
             if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.FRIDAY)) {
+                freitage.add(Feiertage.get(i));
                 freitag++;
             }
             if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
+                samstage.add(Feiertage.get(i));
                 samstag++;
             }
             if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+                sonntage.add(Feiertage.get(i));
                 sonntag++;
             }
         }
-        feiertagAnzahlAusgeben(montag, dienstag, mittwoch, donnerstag, freitag, samstag, sonntag);
+        feiertagAnzahlAusgeben(montag, dienstag, mittwoch, donnerstag, freitag, samstag, sonntag, montage, dienstage,
+                mittwoche, donnerstage, freitage, samstage, sonntage);
 
     }
 
@@ -85,14 +102,16 @@ class Kalender {
         }
     }
 
-    public static void feiertagAnzahlAusgeben(int mo, int di, int mi, int don, int fr, int sa, int so) {
-        System.out.println("Montage: " + mo);
-        System.out.println("Dienstage: " + di);
-        System.out.println("Mittwoche: " + mi);
-        System.out.println("Donnerstage: " + don);
-        System.out.println("Freitage: " + fr);
-        System.out.println("Samstage: " + sa);
-        System.out.println("Sonntage: " + so);
+    public static void feiertagAnzahlAusgeben(int mo, int di, int mi, int don, int fr, int sa, int so, List<LocalDate> Montage,
+                                              List<LocalDate> Dienstage, List<LocalDate> Mittwoche, List<LocalDate> Donnerstage,
+                                              List<LocalDate> Freitage, List<LocalDate> Samstage, List<LocalDate> Sonntage) {
+        System.out.println("Montage: " + mo + " " + Montage);
+        System.out.println("Dienstage: " + di + " " + Dienstage);
+        System.out.println("Mittwoche: " + mi + " " + Mittwoche);
+        System.out.println("Donnerstage: " + don + " " + Donnerstage);
+        System.out.println("Freitage: " + fr + " " + Freitage);
+        System.out.println("Samstage: " + sa + " " + Samstage);
+        System.out.println("Sonntage: " + so + " " + Sonntage);
     }
 
     private static List<String> getWert(JSONObject json, List<String> keys) {
