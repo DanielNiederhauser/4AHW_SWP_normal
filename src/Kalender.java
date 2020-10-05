@@ -96,9 +96,12 @@ class Kalender {
             feiertage.add(LocalDate.of(i, 5, 1));
             feiertage.add(LocalDate.of(i, 8, 15));
             feiertage.add(LocalDate.of(i, 10, 26));
+            feiertage.add(LocalDate.of(i, 11, 1));
+            feiertage.add(LocalDate.of(i, 12, 8));
             feiertage.add(LocalDate.of(i, 12, 25));
             feiertage.add(LocalDate.of(i, 12, 26));
-            feiertage.add(LocalDate.of(i, 12, 1));
+
+
         }
     }
 
