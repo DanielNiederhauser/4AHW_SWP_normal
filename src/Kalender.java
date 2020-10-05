@@ -84,6 +84,7 @@ class Kalender {
                 sonntag++;
             }
         }
+
         feiertagAnzahlAusgeben(montag, dienstag, mittwoch, donnerstag, freitag, samstag, sonntag, montage, dienstage,
                 mittwoche, donnerstage, freitage, samstage, sonntage);
 
@@ -91,6 +92,8 @@ class Kalender {
 
     public static void feiertageGenerieren(List<LocalDate> feiertage, int startjahr, int endjahr) {
         for (int i = startjahr; i <= startjahr + endjahr - startjahr; i++) {
+            feiertage.add(LocalDate.of(i, 1, 1));
+            feiertage.add(LocalDate.of(i, 1, 6));
             feiertage.add(LocalDate.of(i, 5, 1));
             feiertage.add(LocalDate.of(i, 8, 15));
             feiertage.add(LocalDate.of(i, 10, 26));
@@ -98,7 +101,8 @@ class Kalender {
             feiertage.add(LocalDate.of(i, 12, 8));
             feiertage.add(LocalDate.of(i, 12, 25));
             feiertage.add(LocalDate.of(i, 12, 26));
-            feiertage.add(LocalDate.of(i, 12, 1));
+
+
         }
     }
 
