@@ -1,3 +1,10 @@
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.stage.Stage;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,12 +17,48 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.time.*;
 
-class Kalender {
+public class Kalender extends Application {
+    final static String MontagDiagramm = "Montag";
+    final static String DienstagDiagramm = "Dienstag";
+    final static String MittwochDiagramm = "Mittwoch";
+    final static String DonnerstagDiagramm = "Donnerstag";
+    final static String FreitagDiagramm = "Freitag";
+    final static String SamstagDiagramm = "Samstag";
+    final static String SonntagDiagramm = "Sonntag";
+
+    @Override public void start(Stage stage) {
+        stage.setTitle("Feiertagsvergleich");
+        final CategoryAxis xAxis = new CategoryAxis();
+        final NumberAxis yAxis = new NumberAxis();
+        final BarChart<String,Number> bc =
+                new BarChart<String,Number>(xAxis,yAxis);
+        bc.setTitle("Feiertagsverlgeich");
+        xAxis.setLabel("Tag");
+        yAxis.setLabel("Anzahl");
+
+        XYChart.Series series1 = new XYChart.Series();
+        series1.setName("Feiertage von den Jahren " + startjahr + " bis " + endjahr);
+        series1.getData().add(new XYChart.Data(MontagDiagramm, montag));
+        series1.getData().add(new XYChart.Data(DienstagDiagramm, dienstag));
+        series1.getData().add(new XYChart.Data(MittwochDiagramm, mittwoch));
+        series1.getData().add(new XYChart.Data(DonnerstagDiagramm, donnerstag));
+        series1.getData().add(new XYChart.Data(FreitagDiagramm, freitag));
+        series1.getData().add(new XYChart.Data(SamstagDiagramm, samstag));
+        series1.getData().add(new XYChart.Data(SonntagDiagramm, sonntag));
+
+
+
+        Scene scene  = new Scene(bc,800,600);
+        bc.getData().addAll(series1);
+        stage.setScene(scene);
+        stage.show();
+    }
+    static int montag = 0, dienstag = 0, mittwoch = 0, donnerstag = 0, freitag = 0, samstag = 0, sonntag = 0;
+    static int startjahr, endjahr;
     public static void main(String[] args)throws JSONException, MalformedURLException, IOException {
         Scanner reader = new Scanner(System.in);
         List<LocalDate> Feiertage = new ArrayList<>();
-        int montag = 0, dienstag = 0, mittwoch = 0, donnerstag = 0, freitag = 0, samstag = 0, sonntag = 0;
-        int startjahr, endjahr;
+
 
         List<LocalDate> montage = new ArrayList<>();
         List<LocalDate> dienstage = new ArrayList<>();
@@ -87,9 +130,8 @@ class Kalender {
 
         feiertagAnzahlAusgeben(montag, dienstag, mittwoch, donnerstag, freitag, samstag, sonntag, montage, dienstage,
                 mittwoche, donnerstage, freitage, samstage, sonntage);
-
+        launch(args);
     }
-
     public static void feiertageGenerieren(List<LocalDate> feiertage, int startjahr, int endjahr) {
         for (int i = startjahr; i <= startjahr + endjahr - startjahr; i++) {
             feiertage.add(LocalDate.of(i, 1, 1));
@@ -128,5 +170,4 @@ class Kalender {
         }
         return anzahl;
     }
-
 }
