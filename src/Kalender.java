@@ -128,6 +128,9 @@ public class Kalender extends Application {
             }
         }
 
+        //Listen sortieren für schönere Ausgabe
+        listenSortieren(montage,dienstage,mittwoche,donnerstage,freitage,samstage,sonntage);
+
         feiertagAnzahlAusgeben(montag, dienstag, mittwoch, donnerstag, freitag, samstag, sonntag, montage, dienstage,
                 mittwoche, donnerstage, freitage, samstage, sonntage);
         launch(args);
@@ -169,5 +172,16 @@ public class Kalender extends Application {
 
         }
         return anzahl;
+    }
+    private static void listenSortieren(List<LocalDate> Montage,
+                                        List<LocalDate> Dienstage, List<LocalDate> Mittwoche, List<LocalDate> Donnerstage,
+                                        List<LocalDate> Freitage, List<LocalDate> Samstage, List<LocalDate> Sonntage){
+        Collections.sort(Montage);
+        Collections.sort(Dienstage);
+        Collections.sort(Mittwoche);
+        Collections.sort(Donnerstage);
+        Collections.sort(Freitage);
+        Collections.sort(Samstage);
+
     }
 }
