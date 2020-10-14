@@ -168,8 +168,8 @@ public class Kalender extends Application {
 
         List<String> anzahl = new ArrayList<>();
         for(int i = 0; i< keys.size();i++) {
-            JSONObject bestaetigt = (JSONObject) json.get(keys.get(i));
-            anzahl.add( bestaetigt.getString("datum"));
+            JSONObject jsonO = (JSONObject) json.get(keys.get(i));
+            anzahl.add( jsonO.getString("datum"));
 
         }
         return anzahl;
