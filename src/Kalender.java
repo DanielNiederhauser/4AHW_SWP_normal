@@ -246,7 +246,7 @@ public class Kalender extends Application {
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
             ResultSet reSe=myStat.executeQuery("Select * from kalender");
-            System.out.println("Montag      Dienstag        Mittwoch        Donnerstag      Freitag     Samstag     Sonntag");
+            System.out.println("Zeit       Montag      Dienstag        Mittwoch        Donnerstag      Freitag     Samstag     Sonntag");
             while(reSe.next()){
                 String Montag = reSe.getString("Montag");
                 String Dienstag = reSe.getString("Dienstag");
@@ -256,6 +256,8 @@ public class Kalender extends Application {
                 String Samstag = reSe.getString("Samstag");
                 String Sonntag = reSe.getString("Sonntag");
 
+                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+                System.out.printf("%1s",timestamp);
                 System.out.printf("%1s", Montag);
                 System.out.printf("%12s", Dienstag);
                 System.out.printf("%16s", Mittwoch);
