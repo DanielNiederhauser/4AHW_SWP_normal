@@ -135,6 +135,10 @@ public class Kalender extends Application {
         feiertagAnzahlAusgeben(montag, dienstag, mittwoch, donnerstag, freitag, samstag, sonntag, montage, dienstage,
                 mittwoche, donnerstage, freitage, samstage, sonntage);
         launch(args);
+        System.out.println("Wollen Sie Die Eingabe speichern?[ja,nein]");
+        if(reader.next().equals("ja")){
+            Datenbankeintrag();
+        }
     }
     public static void feiertageGenerieren(List<LocalDate> feiertage, int startjahr, int endjahr) {
         for (int i = startjahr; i <= startjahr + endjahr - startjahr; i++) {
@@ -185,4 +189,93 @@ public class Kalender extends Application {
         Collections.sort(Samstage);
 
     }
+    private static void Datenbankeintrag(){
+        final String hostname = "localhost";
+        final String port = "3306";
+        final String dbname = "java";
+        final String user = "java";
+        final String password = "java";
+
+        Connection conn = null;
+
+        try {
+            System.out.println("* Treiber laden");
+            Class.forName("com.mysql.jdbc.Driver");
+        }
+        catch (Exception e) {
+            System.err.println("Unable to load driver.");
+            e.printStackTrace();
+        }
+        try {
+            System.out.println("* Verbindung aufbauen");
+            conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
+            Statement myStat = conn.createStatement();
+            String sql = "INSERT INTO Kalender values(" +montag+","+dienstag+","+mittwoch+","+donnerstag+","+freitag+","+samstag+","+sonntag;
+            myStat.execute(sql);
+
+            System.out.println("* Datenbank-Verbindung beenden");
+            conn.close();
+        }
+        catch (SQLException sqle) {
+            System.out.println("SQLException: " + sqle.getMessage());
+            System.out.println("SQLState: " + sqle.getSQLState());
+            System.out.println("VendorError: " + sqle.getErrorCode());
+            sqle.printStackTrace();
+        }
+    }
+    private static void Datenbankausgabe(){
+        final String hostname = "localhost";
+        final String port = "3306";
+        final String dbname = "java";
+        final String user = "java";
+        final String password = "java";
+
+
+        Connection conn = null;
+
+        try {
+            System.out.println("* Treiber laden");
+            Class.forName("com.mysql.jdbc.Driver");
+        }
+        catch (Exception e) {
+            System.err.println("Unable to load driver.");
+            e.printStackTrace();
+        }
+        try {
+            System.out.println("* Verbindung aufbauen");
+            conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
+            Statement myStat = conn.createStatement();
+            ResultSet reSe=myStat.executeQuery("Select * from kalender");
+            System.out.println("Montag      Dienstag        Mittwoch        Donnerstag      Freitag     Samstag     Sonntag");
+            while(reSe.next()){
+                String Montag = reSe.getString("Montag");
+                String Dienstag = reSe.getString("Dienstag");
+                String Mittwoch = reSe.getString("Mittwoch");
+                String Donnerstag = reSe.getString("Donnerstag");
+                String Freitag = reSe.getString("Freitag");
+                String Samstag = reSe.getString("Samstag");
+                String Sonntag = reSe.getString("Sonntag");
+
+                System.out.printf("%1s", Montag);
+                System.out.printf("%12s", Dienstag);
+                System.out.printf("%16s", Mittwoch);
+                System.out.printf("%16s", Donnerstag);
+                System.out.printf("%16s", Freitag);
+                System.out.printf("%14s", Samstag);
+                System.out.printf("%14s", Sonntag);
+                System.out.println();
+            }
+
+            System.out.println("* Datenbank-Verbindung beenden");
+            conn.close();
+        }
+        catch (SQLException sqle) {
+            System.out.println("SQLException: " + sqle.getMessage());
+            System.out.println("SQLState: " + sqle.getSQLState());
+            System.out.println("VendorError: " + sqle.getErrorCode());
+            sqle.printStackTrace();
+        }
+
+    }
+
 }
