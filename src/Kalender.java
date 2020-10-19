@@ -139,6 +139,10 @@ public class Kalender extends Application {
         if(reader.next().equals("ja")){
             Datenbankeintrag();
         }
+        System.out.println("WOllen Sie Die Datenbank ausgeben?");
+        if(reader.next().equals("ja")){
+            Datenbankausgabe();
+        }
     }
     public static void feiertageGenerieren(List<LocalDate> feiertage, int startjahr, int endjahr) {
         for (int i = startjahr; i <= startjahr + endjahr - startjahr; i++) {
@@ -210,7 +214,9 @@ public class Kalender extends Application {
             System.out.println("* Verbindung aufbauen");
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
-            String sql = "INSERT INTO Kalender values(" +montag+","+dienstag+","+mittwoch+","+donnerstag+","+freitag+","+samstag+","+sonntag;
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            String sql = "INSERT INTO Kalender values(" +"'"+timestamp+"',"+montag+","+dienstag+","+mittwoch+","+donnerstag+","+freitag+","+samstag+","+sonntag+")";
+            System.out.println(sql);
             myStat.execute(sql);
 
             System.out.println("* Datenbank-Verbindung beenden");
@@ -246,8 +252,9 @@ public class Kalender extends Application {
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
             ResultSet reSe=myStat.executeQuery("Select * from kalender");
-            System.out.println("Zeit       Montag      Dienstag        Mittwoch        Donnerstag      Freitag     Samstag     Sonntag");
+            System.out.println("Zeit                                 Montag      Dienstag        Mittwoch        Donnerstag      Freitag     Samstag     Sonntag");
             while(reSe.next()){
+                String zeit = reSe.getString("Datum");
                 String Montag = reSe.getString("Montag");
                 String Dienstag = reSe.getString("Dienstag");
                 String Mittwoch = reSe.getString("Mittwoch");
@@ -256,9 +263,9 @@ public class Kalender extends Application {
                 String Samstag = reSe.getString("Samstag");
                 String Sonntag = reSe.getString("Sonntag");
 
-                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-                System.out.printf("%1s",timestamp);
-                System.out.printf("%1s", Montag);
+
+                System.out.printf("%1s",zeit);
+                System.out.printf("%20s", Montag);
                 System.out.printf("%12s", Dienstag);
                 System.out.printf("%16s", Mittwoch);
                 System.out.printf("%16s", Donnerstag);
