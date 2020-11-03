@@ -56,20 +56,16 @@ public class Kalender extends Application {
     }
     static int montag = 0, dienstag = 0, mittwoch = 0, donnerstag = 0, freitag = 0, samstag = 0, sonntag = 0;
     static int startjahr, endjahr;
+    public static List<LocalDate> Feiertage = new ArrayList<>();
+    public static List<LocalDate> montage = new ArrayList<>();
+    public static List<LocalDate> dienstage = new ArrayList<>();
+    public static List<LocalDate> mittwoche = new ArrayList<>();
+    public static List<LocalDate> donnerstage = new ArrayList<>();
+    public static List<LocalDate> freitage = new ArrayList<>();
+    public static List<LocalDate> samstage = new ArrayList<>();
+    public static List<LocalDate> sonntage = new ArrayList<>();
     public static void main(String[] args)throws JSONException, MalformedURLException, IOException {
         Scanner reader = new Scanner(System.in);
-        List<LocalDate> Feiertage = new ArrayList<>();
-
-
-        List<LocalDate> montage = new ArrayList<>();
-        List<LocalDate> dienstage = new ArrayList<>();
-        List<LocalDate> mittwoche = new ArrayList<>();
-        List<LocalDate> donnerstage = new ArrayList<>();
-        List<LocalDate> freitage = new ArrayList<>();
-        List<LocalDate> samstage = new ArrayList<>();
-        List<LocalDate> sonntage = new ArrayList<>();
-
-
         List<String> dynamischeFeiertage = new ArrayList<>();
         dynamischeFeiertage.add("Christi Himmelfahrt");
         dynamischeFeiertage.add("Ostermontag");
@@ -88,7 +84,6 @@ public class Kalender extends Application {
             for (int j =0;j<tage.size();j++){
                 alleDynamischen.add(tage.get(j));
             }
-
         }
         feiertageGenerieren(Feiertage, startjahr, endjahr);
 
@@ -97,37 +92,7 @@ public class Kalender extends Application {
             Feiertage.add(localDate);
         }
 
-        for (int i = 0; i < Feiertage.size(); i++) {
-
-            if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.MONDAY)) {
-                montage.add(Feiertage.get(i));
-                montag++;
-            }
-            if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.TUESDAY)) {
-                dienstage.add(Feiertage.get(i));
-                dienstag++;
-            }
-            if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.WEDNESDAY)) {
-                mittwoche.add(Feiertage.get(i));
-                mittwoch++;
-            }
-            if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.THURSDAY)) {
-                donnerstage.add(Feiertage.get(i));
-                donnerstag++;
-            }
-            if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.FRIDAY)) {
-                freitage.add(Feiertage.get(i));
-                freitag++;
-            }
-            if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
-                samstage.add(Feiertage.get(i));
-                samstag++;
-            }
-            if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
-                sonntage.add(Feiertage.get(i));
-                sonntag++;
-            }
-        }
+        zaehlMethode();
 
         //Listen sortieren für schönere Ausgabe
         listenSortieren(montage,dienstage,mittwoche,donnerstage,freitage,samstage,sonntage);
@@ -158,6 +123,39 @@ public class Kalender extends Application {
             feiertage.add(LocalDate.of(i, 12, 26));
 
 
+        }
+    }
+    public static void zaehlMethode(){
+        for (int i = 0; i < Feiertage.size(); i++) {
+
+            if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.MONDAY)) {
+                montage.add(Feiertage.get(i));
+                montag++;
+            }
+            if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.TUESDAY)) {
+                dienstage.add(Feiertage.get(i));
+                dienstag++;
+            }
+            if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.WEDNESDAY)) {
+                mittwoche.add(Feiertage.get(i));
+                mittwoch++;
+            }
+            if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.THURSDAY)) {
+                donnerstage.add(Feiertage.get(i));
+                donnerstag++;
+            }
+            if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.FRIDAY)) {
+                freitage.add(Feiertage.get(i));
+                freitag++;
+            }
+            if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
+                samstage.add(Feiertage.get(i));
+                samstag++;
+            }
+            if (Feiertage.get(i).getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+                sonntage.add(Feiertage.get(i));
+                sonntag++;
+            }
         }
     }
 
