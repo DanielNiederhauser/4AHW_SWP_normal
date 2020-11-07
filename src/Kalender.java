@@ -19,6 +19,12 @@ import java.time.*;
 import java.sql.*;
 
 public class Kalender extends Application {
+    final static String hostname = "localhost";
+    final static String port = "3306";
+    final static String dbname = "java";
+    final static String user = "java";
+    final static String password = "java";
+
     final static String MontagDiagramm = "Montag";
     final static String DienstagDiagramm = "Dienstag";
     final static String MittwochDiagramm = "Mittwoch";
@@ -192,12 +198,9 @@ public class Kalender extends Application {
         Collections.sort(Samstage);
 
     }
+
     private static void Datenbankeintrag(){
-        final String hostname = "localhost";
-        final String port = "3306";
-        final String dbname = "java";
-        final String user = "java";
-        final String password = "java";
+
 
         Connection conn = null;
 
@@ -228,6 +231,35 @@ public class Kalender extends Application {
             sqle.printStackTrace();
         }
     }
+    private static void CreateTable(){
+        Connection conn = null;
+
+        try {
+            System.out.println("* Treiber laden");
+            Class.forName("com.mysql.jdbc.Driver");
+        }
+        catch (Exception e) {
+            System.err.println("Unable to load driver.");
+            e.printStackTrace();
+        }
+        try {
+            System.out.println("* Verbindung aufbauen");
+            conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
+            Statement myStat = conn.createStatement();
+            String sql = "CREATE TABLE kalender if not exists(Datum dateTime, Montag int, Dienstag int, Mittwoch int, Donnerstag int, Freitag int, Samstag int, Sonntag int, startjahr int, endjahr int))";
+            myStat.execute(sql);
+
+            System.out.println("* Datenbank-Verbindung beenden");
+            conn.close();
+        }
+        catch (SQLException sqle) {
+            System.out.println("SQLException: " + sqle.getMessage());
+            System.out.println("SQLState: " + sqle.getSQLState());
+            System.out.println("VendorError: " + sqle.getErrorCode());
+            sqle.printStackTrace();
+        }
+    }
+
     private static void Datenbankausgabe(){
         final String hostname = "localhost";
         final String port = "3306";
