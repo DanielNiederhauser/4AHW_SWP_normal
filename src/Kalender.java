@@ -103,10 +103,27 @@ public class Kalender extends Application {
         //Listen sortieren für schönere Ausgabe
         listenSortieren(montage,dienstage,mittwoche,donnerstage,freitage,samstage,sonntage);
 
-        feiertagAnzahlAusgeben(montag, dienstag, mittwoch, donnerstag, freitag, samstag, sonntag, montage, dienstage,
-                mittwoche, donnerstage, freitage, samstage, sonntage);
+        System.out.println("Feiertaganzahl alleine [a] oder die Feiertage selbst auch [s] ausgeben?");
+        String wahl=reader.next();
+        if(wahl.equals("a")){
+            feiertagNurAnzahlAusgeben(montag, dienstag, mittwoch, donnerstag, freitag, samstag, sonntag);
+        }
+        if(wahl.equals("s")){
+            feiertagAnzahlAusgebenErweitert(montag, dienstag, mittwoch, donnerstag, freitag, samstag, sonntag);
+
+        }
         launch(args);
         //Für Datenbank Tabelle erstellen, falls nicht vorhanden
+        System.out.println("Wollen Sie mit der Datenbank interagieren? [ja,nein]");
+        if(reader.next().equals("nein")){
+                try {
+                    conn.close();
+                }catch (SQLException e){
+                    e.printStackTrace();
+                }
+
+            System.exit(0);
+        }
         CreateTable();
         System.out.println("Wollen Sie Die Eingabe speichern?[ja,nein]");
         if(reader.next().equals("ja")){
@@ -115,6 +132,13 @@ public class Kalender extends Application {
         System.out.println("Wollen Sie Die Datenbank ausgeben?[ja,nein]");
         if(reader.next().equals("ja")){
             Datenbankausgabe();
+        }
+        else{
+            try {
+                conn.close();
+            }catch (SQLException e){
+                e.printStackTrace();
+            }
         }
 
     }
@@ -167,16 +191,23 @@ public class Kalender extends Application {
         }
     }
 
-    public static void feiertagAnzahlAusgeben(int mo, int di, int mi, int don, int fr, int sa, int so, List<LocalDate> Montage,
-                                              List<LocalDate> Dienstage, List<LocalDate> Mittwoche, List<LocalDate> Donnerstage,
-                                              List<LocalDate> Freitage, List<LocalDate> Samstage, List<LocalDate> Sonntage) {
-        System.out.println("Montage: " + mo + " " + Montage);
-        System.out.println("Dienstage: " + di + " " + Dienstage);
-        System.out.println("Mittwoche: " + mi + " " + Mittwoche);
-        System.out.println("Donnerstage: " + don + " " + Donnerstage);
-        System.out.println("Freitage: " + fr + " " + Freitage);
-        System.out.println("Samstage: " + sa + " " + Samstage);
-        System.out.println("Sonntage: " + so + " " + Sonntage);
+    public static void feiertagAnzahlAusgebenErweitert(int mo, int di, int mi, int don, int fr, int sa, int so) {
+        System.out.println("Montage: " + mo + " " + montage);
+        System.out.println("Dienstage: " + di + " " + dienstage);
+        System.out.println("Mittwoche: " + mi + " " + mittwoche);
+        System.out.println("Donnerstage: " + don + " " + donnerstage);
+        System.out.println("Freitage: " + fr + " " + freitage);
+        System.out.println("Samstage: " + sa + " " + samstage);
+        System.out.println("Sonntage: " + so + " " + sonntage);
+    }
+    public static void feiertagNurAnzahlAusgeben(int mo, int di, int mi, int don, int fr, int sa, int so) {
+        System.out.println("Montage: " + mo);
+        System.out.println("Dienstage: " + di);
+        System.out.println("Mittwoche: " + mi);
+        System.out.println("Donnerstage: " + don);
+        System.out.println("Freitage: " + fr);
+        System.out.println("Samstage: " + sa);
+        System.out.println("Sonntage: " + so);
     }
 
     private static List<String> getWert(JSONObject json, List<String> keys) {
@@ -200,22 +231,9 @@ public class Kalender extends Application {
         Collections.sort(Samstage);
 
     }
-
+    static Connection conn = null;
     private static void Datenbankeintrag(){
-
-
-        Connection conn = null;
-
         try {
-            System.out.println("* Treiber laden");
-            Class.forName("com.mysql.jdbc.Driver");
-        }
-        catch (Exception e) {
-            System.err.println("Unable to load driver.");
-            e.printStackTrace();
-        }
-        try {
-            System.out.println("* Verbindung aufbauen");
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -223,8 +241,6 @@ public class Kalender extends Application {
                     +sonntag+","+startjahr+","+endjahr+")";
             myStat.execute(sql);
 
-            System.out.println("* Datenbank-Verbindung beenden");
-            conn.close();
         }
         catch (SQLException sqle) {
             System.out.println("SQLException: " + sqle.getMessage());
@@ -248,6 +264,7 @@ public class Kalender extends Application {
             System.out.println("* Verbindung aufbauen");
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
+            System.out.println("* Tabelle Kalender erstellen, falls nicht vorhanden");
             String sql = "CREATE TABLE if not exists Kalender" +
                     "(Datum datetime, " +
                     "Montag int, "+
@@ -261,8 +278,6 @@ public class Kalender extends Application {
                     "Endjahr int)";
             myStat.executeUpdate(sql);
 
-            System.out.println("* Datenbank-Verbindung beenden");
-            conn.close();
         }
         catch (SQLException sqle) {
             System.out.println("SQLException: " + sqle.getMessage());
@@ -279,19 +294,9 @@ public class Kalender extends Application {
         final String user = "java";
         final String password = "java";
 
-
         Connection conn = null;
 
         try {
-            System.out.println("* Treiber laden");
-            Class.forName("com.mysql.jdbc.Driver");
-        }
-        catch (Exception e) {
-            System.err.println("Unable to load driver.");
-            e.printStackTrace();
-        }
-        try {
-            System.out.println("* Verbindung aufbauen");
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
             ResultSet reSe=myStat.executeQuery("Select * from kalender");
