@@ -106,6 +106,8 @@ public class Kalender extends Application {
         feiertagAnzahlAusgeben(montag, dienstag, mittwoch, donnerstag, freitag, samstag, sonntag, montage, dienstage,
                 mittwoche, donnerstage, freitage, samstage, sonntage);
         launch(args);
+        //Für Datenbank Tabelle erstellen, falls nicht vorhanden
+        CreateTable();
         System.out.println("Wollen Sie Die Eingabe speichern?[ja,nein]");
         if(reader.next().equals("ja")){
             Datenbankeintrag();
@@ -246,8 +248,18 @@ public class Kalender extends Application {
             System.out.println("* Verbindung aufbauen");
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
-            String sql = "CREATE TABLE kalender if not exists(Datum dateTime, Montag int, Dienstag int, Mittwoch int, Donnerstag int, Freitag int, Samstag int, Sonntag int, startjahr int, endjahr int))";
-            myStat.execute(sql);
+            String sql = "CREATE TABLE if not exists Kalender" +
+                    "(Datum datetime, " +
+                    "Montag int, "+
+                    "Dienstag int, "+
+                    "Mittwoch int, "+
+                    "Donnerstag int, "+
+                    "Freitag int, "+
+                    "Samstag int, "+
+                    "Sonntag int, "+
+                    "Startjahr int, "+
+                    "Endjahr int)";
+            myStat.executeUpdate(sql);
 
             System.out.println("* Datenbank-Verbindung beenden");
             conn.close();
