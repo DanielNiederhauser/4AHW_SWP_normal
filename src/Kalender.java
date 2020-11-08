@@ -62,7 +62,9 @@ public class Kalender extends Application {
     }
     static int montag = 0, dienstag = 0, mittwoch = 0, donnerstag = 0, freitag = 0, samstag = 0, sonntag = 0;
     static int startjahr, endjahr;
+
     public static List<LocalDate> Feiertage = new ArrayList<>();
+
     public static List<LocalDate> montage = new ArrayList<>();
     public static List<LocalDate> dienstage = new ArrayList<>();
     public static List<LocalDate> mittwoche = new ArrayList<>();
