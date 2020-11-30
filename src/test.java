@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Scanner;
 
 
 public class test extends Application{
@@ -30,7 +31,7 @@ public class test extends Application{
         final LineChart<String,Number> lineChart =
                 new LineChart<String, Number>(xAxis,yAxis);
 
-        lineChart.setTitle("Aktienkurs"+ "Marke");
+        lineChart.setTitle("Aktienkurs"+ marke);
         //defining a series
         XYChart.Series series = new XYChart.Series();
         series.setName("Close Wert");
@@ -39,21 +40,24 @@ public class test extends Application{
             series.getData().addAll(new XYChart.Data(i, aktienPreiseHashmap.get(i)));
         }
 
-
         Scene scene  = new Scene(lineChart,800,600);
         lineChart.getData().add(series);
 
         stage.setScene(scene);
         stage.show();
     }
-    static String URL = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&outputsize=full&apikey=WEO2Z2E1M7UWU3QXX";
-    static List<String> alleDynamischen = new ArrayList<>();
     static double aktienPreis;
     static List<Double> aktienPreise = new ArrayList<>();
     static HashMap<String, Double> aktienPreiseHashmap = new HashMap<String, Double>();
-
+    static String marke;
 
     public static void main(String[] args) throws IOException {
+
+        Scanner reader = new Scanner(System.in);
+        System.out.println("Von welcher Marke wollen Sie den Aktienkurs der Letzten 30 Tage wissen?[TSLA, AAPL, AMZN, ...]");
+        marke = reader.next();
+        String URL = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol="+marke+"&outputsize=full&apikey=WEO2Z2E1M7UWU3QXX";
+        System.out.println(URL);
         JSONObject json = new JSONObject(IOUtils.toString(new URL(URL), Charset.forName("UTF-8")));
         JSONObject firstStep = (JSONObject) json.get("Time Series (Daily)");
         for(int i=10;i<41;i++) {
