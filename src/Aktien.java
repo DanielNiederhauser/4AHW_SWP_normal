@@ -69,7 +69,7 @@ public class Aktien extends Application{
         System.out.println("Test");
         System.out.println(aktienPreiseTreemap);
         Application.launch(args);
-        /*CreateTable();
+        CreateTable();
         Datenbankeintrag();
 
 
@@ -79,7 +79,7 @@ public class Aktien extends Application{
         }
         else {
             System.exit(0);
-        }*/
+        }
     }
     private static double getWert (String key) throws JSONException {
 
@@ -123,7 +123,7 @@ public class Aktien extends Application{
             Statement myStat = conn.createStatement();
 
             for (LocalDate i : aktienPreiseTreemap.keySet()) {
-                String sql = "INSERT INTO " + marke +"("+i+","+aktienPreiseTreemap.get(i)+")";
+                String sql = "INSERT INTO " + marke +" values('"+i+"',"+aktienPreiseTreemap.get(i)+")";
                 myStat.execute(sql);
             }
 
