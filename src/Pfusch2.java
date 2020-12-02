@@ -15,7 +15,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 
-public class Aktien extends Application{
+public class Pfusch2 extends Application{
     final static String hostname = "localhost";
     final static String port = "3306";
     final static String dbname = "java";
@@ -68,18 +68,17 @@ public class Aktien extends Application{
         }
         System.out.println("Test");
         System.out.println(aktienPreiseTreemap);
-        Application.launch(args);
-        /*CreateTable();
+        CreateTable();
         Datenbankeintrag();
 
-
+        Application.launch(args);
         System.out.println("Table ausgeben?");
         if(reader.next().equals("ja")){
             Datenbankausgabe();
         }
         else {
             System.exit(0);
-        }*/
+        }
     }
     private static double getWert (String key) throws JSONException {
 

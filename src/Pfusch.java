@@ -15,7 +15,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 
-public class Aktien extends Application{
+public class Pfusch extends Application{
     final static String hostname = "localhost";
     final static String port = "3306";
     final static String dbname = "java";
@@ -62,24 +62,15 @@ public class Aktien extends Application{
         }
         Collections.sort(dates);
         for(int i=0;i<dates.size();i++) {
-            String temp = dates.get(i);
-            aktienPreiseTreemap.put(LocalDate.parse(temp), getWert(temp));
-            System.out.println(temp);
+                String temp = dates.get(i);
+                aktienPreiseTreemap.put(LocalDate.parse(temp), getWert(temp));
+                System.out.println(temp);
         }
         System.out.println("Test");
         System.out.println(aktienPreiseTreemap);
+        CreateTable();
+
         Application.launch(args);
-        /*CreateTable();
-        Datenbankeintrag();
-
-
-        System.out.println("Table ausgeben?");
-        if(reader.next().equals("ja")){
-            Datenbankausgabe();
-        }
-        else {
-            System.exit(0);
-        }*/
     }
     private static double getWert (String key) throws JSONException {
 
@@ -135,43 +126,6 @@ public class Aktien extends Application{
             System.out.println("VendorError: " + sqle.getErrorCode());
             sqle.printStackTrace();
         }
-    }
-    private static void Datenbankausgabe(){
-        final String hostname = "localhost";
-        final String port = "3306";
-        final String dbname = "java";
-        final String user = "java";
-        final String password = "java";
-
-        Connection conn = null;
-
-        try {
-            conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
-            Statement myStat = conn.createStatement();
-            ResultSet reSe=myStat.executeQuery("Select * from "+marke);
-            System.out.println("Datum                                Wert");
-            while(reSe.next()){
-                String zeit = reSe.getString("Datum");
-                String Wert = reSe.getString("Wert");
-
-
-
-                System.out.printf("%1s",zeit);
-                System.out.printf("%20s", Wert);
-
-                System.out.println();
-            }
-
-            System.out.println("* Datenbank-Verbindung beenden");
-            conn.close();
-        }
-        catch (SQLException sqle) {
-            System.out.println("SQLException: " + sqle.getMessage());
-            System.out.println("SQLState: " + sqle.getSQLState());
-            System.out.println("VendorError: " + sqle.getErrorCode());
-            sqle.printStackTrace();
-        }
-
     }
 
 }
