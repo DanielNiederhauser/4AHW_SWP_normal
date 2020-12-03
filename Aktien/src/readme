@@ -1,8 +1,0 @@
-Aktienprogramm:
-Mithilfe dieses Programmes ist es möglich, Aktienwerte auszulesen und zu verarbeiten.
-Aktuell findet zuerst ein API-Aufruf statt, wo die letzten 100 close Aktienwerte eines vom Benutzer ausgewählten Unternehmens 
-abgerufen werden und dann in der Datenbank "Java" in einen eigenen Table gespeichert werden (Falls der Table noch nicht existiert,
-wird er erstellt). Dann wird der Benutzer gefragt, ob er sich den Table ausgeben will.
-Abschließend wird noch eine JavaFX Grafik (Liniendiagramm) dargestellt. 
-Updates werden folgen. (Daten, die schon in dem Table stehen, werden nicht mehr doppelt abgespeichert sondern geupdatet, ...)
-Wie ein Programmablauf aussehen könnte, sieht man in den Bildern in /Aktien/src/
