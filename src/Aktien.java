@@ -14,7 +14,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.*;
 
-
+//Primarykey muss date sein
 public class Aktien extends Application{
 
     final static String hostname = "localhost";
