@@ -18,7 +18,6 @@ import java.util.*;
 public class Aktien extends Application{
 
     final static String hostname = "localhost";
-    final static String port = "3306";
     final static String dbname = "java";
     final static String user = "java";
     final static String password = "java";
@@ -66,10 +65,7 @@ public class Aktien extends Application{
         for(int i=0;i<dates.size();i++) {
             String temp = dates.get(i);
             aktienPreiseTreemap.put(LocalDate.parse(temp), getWert(temp));
-            System.out.println(temp);
         }
-        System.out.println("Test");
-        System.out.println(aktienPreiseTreemap);
         Application.launch(args);
         CreateTable();
         Datenbankeintrag();
@@ -82,6 +78,8 @@ public class Aktien extends Application{
         else {
             System.exit(0);
         }
+        //für Gleitdurchschnitt: Runden auf 2 Nachkommastellen der
+        //SELECT AVG(wert) as 'Durchschnitt' FROM (SELECT wert FROM tsla ORDER BY Datum DESC LIMIT 100) as t;
     }
     private static double getWert (String key) throws JSONException {
 
@@ -105,9 +103,9 @@ public class Aktien extends Application{
             System.out.println("* Verbindung aufbauen");
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
-            System.out.println("* Tabelle Aktien erstellen, falls nicht vorhanden");
+            System.out.println("* Tabelle"+marke+" erstellen, falls nicht vorhanden");
             String sql = "CREATE TABLE if not exists "+marke +
-                    "(Datum datetime, Wert double)";
+                    "(Datum date, Wert double, PRIMARY KEY(Datum));";
             myStat.executeUpdate(sql);
 
         }
@@ -125,7 +123,7 @@ public class Aktien extends Application{
             Statement myStat = conn.createStatement();
 
             for (LocalDate i : aktienPreiseTreemap.keySet()) {
-                String sql = "INSERT INTO " + marke +" values('"+i+"',"+aktienPreiseTreemap.get(i)+")";
+                String sql = "INSERT IGNORE INTO " + marke +" values('"+i+"',"+aktienPreiseTreemap.get(i)+");";
                 myStat.execute(sql);
             }
 
