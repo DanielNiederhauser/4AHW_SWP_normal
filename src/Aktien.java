@@ -27,8 +27,7 @@ public class Aktien extends Application{
         final CategoryAxis xAxis = new CategoryAxis();
         final NumberAxis yAxis = new NumberAxis();
         xAxis.setLabel("Tag");
-        final LineChart<String,Number> lineChart =
-                new LineChart<String, Number>(xAxis,yAxis);
+        final LineChart<String,Number> lineChart = new LineChart<String, Number>(xAxis,yAxis);
         lineChart.setTitle("Aktienkurs "+ marke.toUpperCase());
         XYChart.Series series = new XYChart.Series();
         series.setName("Close Werte");
@@ -51,7 +50,7 @@ public class Aktien extends Application{
     static List<String> dates = new ArrayList<>();
 
     static JSONObject o;
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, SQLException {
         Scanner reader = new Scanner(System.in);
         System.out.println("Von welcher Marke wollen Sie den Aktienkurs der Letzten 100 Tage wissen?[TSLA, AAPL, AMZN, ...]");
         marke = reader.next();
@@ -66,7 +65,6 @@ public class Aktien extends Application{
             String temp = dates.get(i);
             aktienPreiseTreemap.put(LocalDate.parse(temp), getWert(temp));
         }
-        Application.launch(args);
         CreateTable();
         Datenbankeintrag();
 
@@ -79,7 +77,10 @@ public class Aktien extends Application{
             System.exit(0);
         }
         //für Gleitdurchschnitt: Runden auf 2 Nachkommastellen der
-        //SELECT AVG(wert) as 'Durchschnitt' FROM (SELECT wert FROM tsla ORDER BY Datum DESC LIMIT 100) as t;
+
+        Gleitdurchschnitt();
+        Application.launch(args);
+
     }
     private static double getWert (String key) throws JSONException {
 
@@ -103,7 +104,7 @@ public class Aktien extends Application{
             System.out.println("* Verbindung aufbauen");
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
-            System.out.println("* Tabelle"+marke+" erstellen, falls nicht vorhanden");
+            System.out.println("* Tabelle "+marke+" erstellen, falls nicht vorhanden");
             String sql = "CREATE TABLE if not exists "+marke +
                     "(Datum date, Wert double, PRIMARY KEY(Datum));";
             myStat.executeUpdate(sql);
@@ -127,7 +128,6 @@ public class Aktien extends Application{
                 myStat.execute(sql);
             }
 
-
         }
         catch (SQLException sqle) {
             System.out.println("SQLException: " + sqle.getMessage());
@@ -149,12 +149,10 @@ public class Aktien extends Application{
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
             ResultSet reSe=myStat.executeQuery("Select * from "+marke);
-            System.out.println("Datum                                Wert");
+            System.out.println("Datum                   Wert");
             while(reSe.next()){
                 String zeit = reSe.getString("Datum");
                 String Wert = reSe.getString("Wert");
-
-
 
                 System.out.printf("%1s",zeit);
                 System.out.printf("%20s", Wert);
@@ -171,6 +169,27 @@ public class Aktien extends Application{
             System.out.println("VendorError: " + sqle.getErrorCode());
             sqle.printStackTrace();
         }
+
+    }
+    private static void Gleitdurchschnitt() throws SQLException {
+        try{
+            conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
+
+            System.out.print("Gleitdurchschnitt: ");
+            Statement myStat = conn.createStatement();
+
+            ResultSet reSe=myStat.executeQuery("SELECT round(AVG(wert),2) as 'Durchschnitt' FROM (SELECT wert FROM "+marke+" ORDER BY Datum DESC LIMIT 100) as t;");
+            if (reSe.next()) {
+
+                System.out.println(reSe.getString(1));
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+            System.out.println("SQL Fehler Gleitdurchschnitt");
+        }
+
+
+
 
     }
 
