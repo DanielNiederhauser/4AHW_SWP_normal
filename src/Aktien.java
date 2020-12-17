@@ -1,6 +1,11 @@
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.chart.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
@@ -41,6 +46,14 @@ public class Aktien extends Application{
             series.getData().addAll(new XYChart.Data(i.toString(), javaFXTreemap.get(i)));
         }
 
+        if(gleitdurchschnitt>getLastCloseWert()){
+            lineChart.setStyle("-fx-background-color: #FF0000;");
+        }
+        else {
+            lineChart.setStyle("-fx-background-color: #00FF00;");
+
+        }
+
         Scene scene  = new Scene(lineChart,1300,800);
         lineChart.getData().add(series);
 
@@ -75,15 +88,15 @@ public class Aktien extends Application{
         CreateTable();
         Datenbankeintrag();
 
-
         System.out.println("Table ausgeben?");
         if(reader.next().equals("ja")){
             Datenbankausgabe();
         }
 
-        //für Gleitdurchschnitt: Runden auf 2 Nachkommastellen der
-
         Gleitdurchschnitt();
+        System.out.println("Letzter close-Wert: "+getLastCloseWert());
+        System.out.println("Gleidurchschnitt: "+ gleitdurchschnitt);
+
         System.out.print("Wieviele der letzten Daten wollen Sie in der Grafik sehen?");
         anzahlGrafik=reader.nextInt();
         javaFXTreemap=javaFX(anzahlGrafik);
@@ -162,7 +175,6 @@ public class Aktien extends Application{
                 System.out.println();
             }
 
-            System.out.println("* Datenbank-Verbindung beenden");
             conn.close();
         }
         catch (SQLException sqle) {
@@ -173,17 +185,16 @@ public class Aktien extends Application{
         }
 
     }
+    static Double gleitdurchschnitt;
     private static void Gleitdurchschnitt() throws SQLException {
         try{
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
-
-            System.out.print("Gleitdurchschnitt: ");
             Statement myStat = conn.createStatement();
 
             ResultSet reSe=myStat.executeQuery("SELECT round(AVG(wert),2) as 'Durchschnitt' FROM (SELECT wert FROM "+marke+" ORDER BY Datum DESC LIMIT 100) as t;");
             if (reSe.next()) {
-
-                System.out.println(reSe.getString(1));
+                String gleitdurchschnittString = reSe.getString(1);
+                gleitdurchschnitt=Double.parseDouble(gleitdurchschnittString);
             }
         }catch (SQLException e){
             e.printStackTrace();
@@ -209,7 +220,6 @@ public class Aktien extends Application{
 
             }
 
-            System.out.println("* Datenbank-Verbindung beenden");
             conn.close();
         }
         catch (SQLException sqle) {
@@ -220,6 +230,29 @@ public class Aktien extends Application{
         }
         return treeMap;
 
+    }
+    static Double letzterCloseWert;
+    private static double getLastCloseWert(){
+        Connection conn = null;
+
+        try {
+            conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
+            Statement myStat = conn.createStatement();
+            ResultSet reSe=myStat.executeQuery("Select Wert from "+marke +" order by Datum DESC limit 1");
+            if (reSe.next()) {
+                String temp = reSe.getString(1);
+                letzterCloseWert=Double.parseDouble(temp);
+            }
+
+            conn.close();
+        }
+        catch (SQLException sqle) {
+            System.out.println("SQLException: " + sqle.getMessage());
+            System.out.println("SQLState: " + sqle.getSQLState());
+            System.out.println("VendorError: " + sqle.getErrorCode());
+            sqle.printStackTrace();
+        }
+        return letzterCloseWert;
     }
 
 }
