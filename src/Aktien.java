@@ -22,6 +22,11 @@ public class Aktien extends Application{
     final static String user = "java";
     final static String password = "java";
 
+    static Map<LocalDate, Double> javaFXTreemap = new TreeMap<LocalDate, Double>();
+    //static Map<LocalDate, Double> javaFXTreemap = javaFX();
+
+
+
     @Override public void start(Stage stage) {
         stage.setTitle("Aktienkurs");
         final CategoryAxis xAxis = new CategoryAxis();
@@ -32,8 +37,8 @@ public class Aktien extends Application{
         XYChart.Series series = new XYChart.Series();
         series.setName("Close Werte");
 
-        for (LocalDate i : aktienPreiseTreemap.keySet()) {
-            series.getData().addAll(new XYChart.Data(i.toString(), aktienPreiseTreemap.get(i)));
+        for (LocalDate i : javaFXTreemap.keySet()) {
+            series.getData().addAll(new XYChart.Data(i.toString(), javaFXTreemap.get(i)));
         }
 
         Scene scene  = new Scene(lineChart,1300,800);
@@ -46,14 +51,16 @@ public class Aktien extends Application{
     static Map<LocalDate, Double> aktienPreiseTreemap = new TreeMap<LocalDate, Double>();
 
 
-    static String marke;
+    static String marke = "tsla";
     static List<String> dates = new ArrayList<>();
+    static int anzahlGrafik;
 
     static JSONObject o;
     public static void main(String[] args) throws IOException, SQLException {
         Scanner reader = new Scanner(System.in);
         System.out.println("Von welcher Marke wollen Sie den Aktienkurs der Letzten 100 Tage wissen?[TSLA, AAPL, AMZN, ...]");
         marke = reader.next();
+
         String URL = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol="+marke+"&outputsize=compact&apikey=WEO2Z2E1M7UWU3QXX";
         JSONObject json = new JSONObject(IOUtils.toString(new URL(URL), Charset.forName("UTF-8")));
         o = json.getJSONObject("Time Series (Daily)");
@@ -73,12 +80,13 @@ public class Aktien extends Application{
         if(reader.next().equals("ja")){
             Datenbankausgabe();
         }
-        else {
-            System.exit(0);
-        }
+
         //für Gleitdurchschnitt: Runden auf 2 Nachkommastellen der
 
         Gleitdurchschnitt();
+        System.out.print("Wieviele der letzten Daten wollen Sie in der Grafik sehen?");
+        anzahlGrafik=reader.nextInt();
+        javaFXTreemap=javaFX(anzahlGrafik);
         Application.launch(args);
 
     }
@@ -137,12 +145,6 @@ public class Aktien extends Application{
         }
     }
     private static void Datenbankausgabe(){
-        final String hostname = "localhost";
-        final String port = "3306";
-        final String dbname = "java";
-        final String user = "java";
-        final String password = "java";
-
         Connection conn = null;
 
         try {
@@ -187,9 +189,36 @@ public class Aktien extends Application{
             e.printStackTrace();
             System.out.println("SQL Fehler Gleitdurchschnitt");
         }
+    }
+    private static Map<LocalDate, Double> javaFX(int anzahl){
+        Map<LocalDate, Double> treeMap = new TreeMap<LocalDate, Double>();
 
+        Connection conn = null;
 
+        try {
+            conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
+            Statement myStat = conn.createStatement();
+            ResultSet reSe=myStat.executeQuery("Select * from "+marke +" order by Datum DESC Limit "+anzahl);
+            while(reSe.next()){
+                String datum = reSe.getString("Datum");
+                String Wert = reSe.getString("Wert");
 
+                LocalDate tempLocaldate = LocalDate.parse(datum);
+                Double tempDouble = Double.parseDouble(Wert);
+                treeMap.put(tempLocaldate,tempDouble);
+
+            }
+
+            System.out.println("* Datenbank-Verbindung beenden");
+            conn.close();
+        }
+        catch (SQLException sqle) {
+            System.out.println("SQLException: " + sqle.getMessage());
+            System.out.println("SQLState: " + sqle.getSQLState());
+            System.out.println("VendorError: " + sqle.getErrorCode());
+            sqle.printStackTrace();
+        }
+        return treeMap;
 
     }
 
