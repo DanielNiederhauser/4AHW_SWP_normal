@@ -6,3 +6,5 @@ wird er erstellt). Dann wird der Benutzer gefragt, ob er sich den Table ausgeben
 Abschließend wird noch eine JavaFX Grafik (Liniendiagramm) dargestellt. 
 Updates werden folgen. (Daten, die schon in dem Table stehen, werden nicht mehr doppelt abgespeichert sondern geupdatet, ...)
 Wie ein Programmablauf aussehen könnte, sieht man in den Bildern in /Aktien/src/
+Treemap, da die Einträge sofort in der richtigen Reihenfolge einsortiert werden --> übersichtlicher in der Datenbank --> mit einfachem Select * from x; wird gleich alles in 
+richtigen Reihenfolge schön ausgegeben und man spart sich zusätzliche order by, etc.
