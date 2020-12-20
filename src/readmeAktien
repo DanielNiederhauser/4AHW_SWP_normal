@@ -2,9 +2,17 @@ Aktienprogramm:
 Mithilfe dieses Programmes ist es möglich, Aktienwerte auszulesen und zu verarbeiten.
 Aktuell findet zuerst ein API-Aufruf statt, wo die letzten 100 close Aktienwerte eines vom Benutzer ausgewählten Unternehmens 
 abgerufen werden und dann in der Datenbank "Java" in einen eigenen Table gespeichert werden (Falls der Table noch nicht existiert,
-wird er erstellt). Dann wird der Benutzer gefragt, ob er sich den Table ausgeben will.
-Abschließend wird noch eine JavaFX Grafik (Liniendiagramm) dargestellt. 
-Updates werden folgen. (Daten, die schon in dem Table stehen, werden nicht mehr doppelt abgespeichert sondern geupdatet, ...)
-Wie ein Programmablauf aussehen könnte, sieht man in den Bildern in /Aktien/src/
-Treemap, da die Einträge sofort in der richtigen Reihenfolge einsortiert werden --> übersichtlicher in der Datenbank --> mit einfachem Select * from x; wird gleich alles in 
-richtigen Reihenfolge schön ausgegeben und man spart sich zusätzliche order by, etc.
+wird er erstellt). Dann wird der Benutzer gefragt, ob er sich den Table ausgeben lassen will.
+Danach wird der Gleitdurchschnitt der letzten x Tage berechnet, wobei x vom Benutzer bestimmt wird.
+Dann wird der Letzte Close-Wert und der Gleitdurschnitt ausgegeben. Nach dem wird der Benutzer gefragt, wieviele der letzten DB-Einträge er in dem JavaFX-Diagramm sehen will.
+Abschließend wird noch die Grafik angezeigt und wenn der letzte Close-Wert größer, als der Gleitdurchschnitt ist, grün eingefärbt, und wenn er kleiner ist, rot. 
+
+Verbesserungen durch letztes Update:
+1. Die Daten werden nicht mehr doppelt in die DB eingetragen.
+2. dynamischer Gleitdurchschnitt (davor garkeiner)
+3. Bei der javaFX Grafik werden jetzt die Daten aus der DB-genommen (davor die letzten 100 von API)
+4. Die Grafik wird eingefärbt, abhängig ob der Kurs steigt oder sinkt (letzterCloseWert>Gleitdurchschnitt --> Grün --> kurs steigt, wenn kleiner --> rot --> Kurs sinkt)
+(davor garkeine Einfärbungen)
+5. Bilder eines Programmablaufs aktualisiert.
+
+TODO: API dynamisch, aktuell fix auf 100. 
