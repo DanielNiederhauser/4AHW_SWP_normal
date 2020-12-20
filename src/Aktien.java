@@ -19,7 +19,8 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.*;
 
-//Primarykey muss date sein
+//Primarykey muss Datum sein
+
 public class Aktien extends Application{
 
     final static String hostname = "localhost";
@@ -27,9 +28,15 @@ public class Aktien extends Application{
     final static String user = "java";
     final static String password = "java";
 
+    //Die Liste der letzten x Einträge aus der Datenbank, wobei x vom Benutzer eingegeben wird
     static Map<LocalDate, Double> javaFXTreemap = new TreeMap<LocalDate, Double>();
-    //static Map<LocalDate, Double> javaFXTreemap = javaFX();
+    //Die Liste der letzten 100 aus der API
+    static Map<LocalDate, Double> aktienPreiseTreemap = new TreeMap<LocalDate, Double>();
+    static Double gleitdurchschnitt;
+    static Double letzterCloseWert;
+    static Connection conn = null;
 
+    static String marke;
 
 
     @Override public void start(Stage stage) {
@@ -60,11 +67,7 @@ public class Aktien extends Application{
         stage.setScene(scene);
         stage.show();
     }
-    //Treemap verwenden, da es bei der insertion automatisch die Dates sortiert einfügt
-    static Map<LocalDate, Double> aktienPreiseTreemap = new TreeMap<LocalDate, Double>();
 
-
-    static String marke = "tsla";
     static List<String> dates = new ArrayList<>();
     static int anzahlGrafik;
 
@@ -77,6 +80,7 @@ public class Aktien extends Application{
         String URL = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol="+marke+"&outputsize=compact&apikey=WEO2Z2E1M7UWU3QXX";
         JSONObject json = new JSONObject(IOUtils.toString(new URL(URL), Charset.forName("UTF-8")));
         o = json.getJSONObject("Time Series (Daily)");
+
         for(int i = 0;i<100;i++){
             dates.add(o.names().get(i).toString());
         }
@@ -111,7 +115,6 @@ public class Aktien extends Application{
     }
 
     private static void CreateTable(){
-        Connection conn = null;
 
         try {
             System.out.println("* Treiber laden");
@@ -138,7 +141,6 @@ public class Aktien extends Application{
             sqle.printStackTrace();
         }
     }
-    static Connection conn = null;
     private static void Datenbankeintrag(){
         try {
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
@@ -185,7 +187,6 @@ public class Aktien extends Application{
         }
 
     }
-    static Double gleitdurchschnitt;
     private static void Gleitdurchschnitt() throws SQLException {
         try{
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
@@ -231,7 +232,6 @@ public class Aktien extends Application{
         return treeMap;
 
     }
-    static Double letzterCloseWert;
     private static double getLastCloseWert(){
         Connection conn = null;
 
