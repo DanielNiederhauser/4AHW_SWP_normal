@@ -160,8 +160,6 @@ public class Aktien extends Application{
         }
     }
     private static void Datenbankausgabe(){
-        Connection conn = null;
-
         try {
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
