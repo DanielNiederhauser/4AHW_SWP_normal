@@ -35,7 +35,6 @@ public class Aktien extends Application{
     static Double gleitdurchschnitt;
     static Double letzterCloseWert;
     static Connection conn = null;
-
     static String marke;
 
 
@@ -97,11 +96,12 @@ public class Aktien extends Application{
             Datenbankausgabe();
         }
 
-        Gleitdurchschnitt();
+        System.out.print("Wieviele der letzten Einträge sollen für den Gleidurchschnitt verwendet werden?" );
+        Gleitdurchschnitt(reader.nextInt());
         System.out.println("Letzter close-Wert: "+getLastCloseWert());
         System.out.println("Gleidurchschnitt: "+ gleitdurchschnitt);
 
-        System.out.print("Wieviele der letzten Daten wollen Sie in der Grafik sehen?");
+        System.out.print("Wieviele der letzten Daten wollen Sie in der Grafik sehen? ");
         anzahlGrafik=reader.nextInt();
         javaFXTreemap=javaFX(anzahlGrafik);
         Application.launch(args);
@@ -185,12 +185,13 @@ public class Aktien extends Application{
         }
 
     }
-    private static void Gleitdurchschnitt() throws SQLException {
+    private static void Gleitdurchschnitt(int anzahlGleitdurchschnitt) throws SQLException {
         try{
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
 
-            ResultSet reSe=myStat.executeQuery("SELECT round(AVG(wert),2) as 'Durchschnitt' FROM (SELECT wert FROM "+marke+" ORDER BY Datum DESC LIMIT 100) as t;");
+            ResultSet reSe=myStat.executeQuery("SELECT round(AVG(wert),2) as 'Durchschnitt' FROM (SELECT wert FROM "+marke+" ORDER BY Datum DESC LIMIT "
+                    +anzahlGleitdurchschnitt+") as t;");
             if (reSe.next()) {
                 String gleitdurchschnittString = reSe.getString(1);
                 gleitdurchschnitt=Double.parseDouble(gleitdurchschnittString);

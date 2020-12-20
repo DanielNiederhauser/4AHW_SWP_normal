@@ -1,3 +1,4 @@
+  
 Aktienprogramm:
 Mithilfe dieses Programmes ist es möglich, Aktienwerte auszulesen und zu verarbeiten.
 Aktuell findet zuerst ein API-Aufruf statt, wo die letzten 100 close Aktienwerte eines vom Benutzer ausgewählten Unternehmens 
