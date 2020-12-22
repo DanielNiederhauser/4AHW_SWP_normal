@@ -73,14 +73,14 @@ public class Aktien extends Application{
     static JSONObject o;
     public static void main(String[] args) throws IOException, SQLException {
         Scanner reader = new Scanner(System.in);
-        System.out.println("Von welcher Marke wollen Sie den Aktienkurs der Letzten 100 Tage wissen?[TSLA, AAPL, AMZN, ...]");
+        System.out.println("Von welcher Marke wollen Sie den Aktienkurs wissen?[TSLA, AAPL, AMZN, ...]");
         marke = reader.next();
 
-        String URL = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol="+marke+"&outputsize=compact&apikey=WEO2Z2E1M7UWU3QXX";
+        String URL = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol="+marke+"&outputsize=full&apikey=WEO2Z2E1M7UWU3QXX";
         JSONObject json = new JSONObject(IOUtils.toString(new URL(URL), Charset.forName("UTF-8")));
         o = json.getJSONObject("Time Series (Daily)");
 
-        for(int i = 0;i<100;i++){
+        for(int i = 0;i<o.length();i++){
             dates.add(o.names().get(i).toString());
         }
         Collections.sort(dates);
@@ -101,7 +101,7 @@ public class Aktien extends Application{
         System.out.println("Letzter close-Wert: "+getLastCloseWert());
         System.out.println("Gleidurchschnitt: "+ gleitdurchschnitt);
 
-        System.out.print("Wieviele der letzten Daten wollen Sie in der Grafik sehen? ");
+        System.out.print("Wieviele der letzten Einträge wollen Sie in der Grafik sehen? ");
         anzahlGrafik=reader.nextInt();
         javaFXTreemap=javaFX(anzahlGrafik);
         Application.launch(args);
