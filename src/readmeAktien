@@ -1,7 +1,7 @@
   
 Aktienprogramm:
 Mithilfe dieses Programmes ist es möglich, Aktienwerte auszulesen und zu verarbeiten.
-Aktuell findet zuerst ein API-Aufruf statt, wo die letzten 100 close Aktienwerte eines vom Benutzer ausgewählten Unternehmens 
+Es findet zuerst ein API-Aufruf statt, wo die alle Aktienwerte eines vom Benutzer ausgewählten Unternehmens 
 abgerufen werden und dann in der Datenbank "Java" in einen eigenen Table gespeichert werden (Falls der Table noch nicht existiert,
 wird er erstellt). Dann wird der Benutzer gefragt, ob er sich den Table ausgeben lassen will.
 Danach wird der Gleitdurchschnitt der letzten x Tage berechnet, wobei x vom Benutzer bestimmt wird.
@@ -15,5 +15,7 @@ Verbesserungen durch letztes Update:
 4. Die Grafik wird eingefärbt, abhängig ob der Kurs steigt oder sinkt (letzterCloseWert>Gleitdurchschnitt --> Grün --> kurs steigt, wenn kleiner --> rot --> Kurs sinkt)
 (davor garkeine Einfärbungen)
 5. Bilder eines Programmablaufs aktualisiert.
+6. API full (davor nur die letzten 100 Werte)
 
-TODO: API dynamisch, aktuell fix auf 100. 
+TODO: Evtl in den Ferien:
+Aktiensplit miteinberechnen
