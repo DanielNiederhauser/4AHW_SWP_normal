@@ -1,21 +1,10 @@
   
-Aktienprogramm:
+Aktienprogramm Niederhauser Daniel:
 Mithilfe dieses Programmes ist es möglich, Aktienwerte auszulesen und zu verarbeiten.
 Es findet zuerst ein API-Aufruf statt, wo die alle Aktienwerte eines vom Benutzer ausgewählten Unternehmens 
 abgerufen werden und dann in der Datenbank "Java" in einen eigenen Table gespeichert werden (Falls der Table noch nicht existiert,
-wird er erstellt). Dann wird der Benutzer gefragt, ob er sich den Table ausgeben lassen will.
-Danach wird der Gleitdurchschnitt der letzten x Tage berechnet, wobei x vom Benutzer bestimmt wird.
-Dann wird der Letzte Close-Wert und der Gleitdurschnitt ausgegeben. Nach dem wird der Benutzer gefragt, wieviele der letzten DB-Einträge er in dem JavaFX-Diagramm sehen will.
-Abschließend wird noch die Grafik angezeigt und wenn der letzte Close-Wert größer, als der Gleitdurchschnitt ist, grün eingefärbt, und wenn er kleiner ist, rot. 
+wird er erstellt). Dann wird der Benutzer gefragt, ob er sich den Table ausgeben lassen will. Nachdem gibt der Benutzer den gewünschten Gleitdurchschnitt z.B. 200 an.
+Anschließend gibt der Benutzer noch die gewünschte Datenmenge an, welche er danach sehen will z.B. 500.
+Abschließend wird noch die Grafik angezeigt und wenn der letzte Close-Wert größer, als der aktuelle Gleitdurchschnitt ist, grün eingefärbt, und wenn er kleiner ist, rot. 
 
-Verbesserungen durch letztes Update:
-1. Die Daten werden nicht mehr doppelt in die DB eingetragen.
-2. dynamischer Gleitdurchschnitt (davor garkeiner)
-3. Bei der javaFX Grafik werden jetzt die Daten aus der DB-genommen (davor die letzten 100 von API)
-4. Die Grafik wird eingefärbt, abhängig ob der Kurs steigt oder sinkt (letzterCloseWert>Gleitdurchschnitt --> Grün --> kurs steigt, wenn kleiner --> rot --> Kurs sinkt)
-(davor garkeine Einfärbungen)
-5. Bilder eines Programmablaufs aktualisiert.
-6. API full (davor nur die letzten 100 Werte)
 
-TODO: Evtl in den Ferien:
-Aktiensplit miteinberechnen
