@@ -310,5 +310,4 @@ public class Aktien extends Application{
         }
         return fertige;
     }
-
 }
