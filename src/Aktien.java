@@ -224,7 +224,6 @@ public class Aktien extends Application{
                 LocalDate tempLocaldate = LocalDate.parse(datum);
                 Double tempDouble = Double.parseDouble(Wert);
                 treeMap.put(tempLocaldate,tempDouble);
-
             }
 
             conn.close();
@@ -236,7 +235,6 @@ public class Aktien extends Application{
             sqle.printStackTrace();
         }
         return treeMap;
-
     }
     private static double getLastCloseWert(){
         Connection conn = null;
@@ -264,7 +262,6 @@ public class Aktien extends Application{
         try {
             Map<LocalDate, Double> treeMap = new TreeMap<LocalDate, Double>();
 
-
             Connection conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
             ResultSet reSe=myStat.executeQuery("Select * from "+marke +" order by Datum desc limit "+(anzahl+gleitdurchschnittAnzahl)+ ";");
@@ -275,11 +272,9 @@ public class Aktien extends Application{
                 LocalDate tempLocaldate = LocalDate.parse(datum);
                 Double tempDouble = Double.parseDouble(Wert);
                 treeMap.put(tempLocaldate,tempDouble);
-
             }
             conn.close();
             return treeMap;
-
         }
         catch (SQLException sqle) {
             System.out.println("SQLException: " + sqle.getMessage());
