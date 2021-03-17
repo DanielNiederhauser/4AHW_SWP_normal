@@ -79,6 +79,7 @@ public class Aktien extends Application{
         series.setName("Close Werte");
         series1.setName("Gleitdurchschnitt");
 
+        saveAsPng(lineChart, "src//Bilder//"+marke.toUpperCase()+"_"+LocalDate.now()+".png");
         stage.setScene(scene);
         stage.show();
     }
@@ -89,46 +90,50 @@ public class Aktien extends Application{
     static Scanner reader = new Scanner(System.in);
     static LocalDate startdatum;
     public static void main(String[] args) throws IOException, SQLException {
-        System.out.println("Von welcher Marke wollen Sie den Aktienkurs wissen?[TSLA, AAPL, AMZN, ...]");
-        marke = reader.next();
+        List<String> aktien = ladeDatei("src/AktienListe.txt");
 
-        System.out.println("Von welchem Datum rückwirkend? [1999-11-01]");
-         startdatum= LocalDate.parse(reader.next());
-
-        String URL = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol="+marke+"&outputsize=full&apikey=WEO2Z2E1M7UWU3QXX";
-        JSONObject json = new JSONObject(IOUtils.toString(new URL(URL), Charset.forName("UTF-8")));
-        o = json.getJSONObject("Time Series (Daily)");
-
-        for(int i = 0;i<o.length();i++){
-            dates.add(o.names().get(i).toString());
-        }
-        Collections.sort(dates);
-        for(int i=0;i<dates.size();i++) {
-            String temp = dates.get(i);
-            aktienPreiseTreemap.put(LocalDate.parse(temp), getWert(temp));
-        }
-        CreateTable();
-        Datenbankeintrag();
-
-        System.out.println("Table ausgeben?");
-        if(reader.next().equals("ja")){
-            Datenbankausgabe();
-        }
-
-        System.out.print("Wieviele der letzten Einträge sollen für den Gleidurchschnitt verwendet werden?" );
-        gleitdurchschnittAnzahl = reader.nextInt();
-        Gleitdurchschnitt(gleitdurchschnittAnzahl);
+        System.out.print("Wieviele der letzten Einträge sollen für den Gleidurchschnitt verwendet werden? " );
+        gleitdurchschnittAnzahl=reader.nextInt();
 
         System.out.print("Wieviele der letzten Einträge wollen Sie in der Grafik sehen? ");
-        anzahlGrafik=reader.nextInt();
-        Map<LocalDate, Double> letztexmal2Werte = GetLetztexMal2Werte(anzahlGrafik);
-        List<Double> letztexmal2WerteDouble = treeMapZuGeordnetenListe(letztexmal2Werte);
+        anzahlGrafik = reader.nextInt();
 
-        JavaFXGleitdurchschnitt = GleitdurchschnittList(letztexmal2WerteDouble);
+        System.out.print("Von welchem Datum rückwirkend? [1999-11-01]");
+        startdatum = LocalDate.parse(reader.next());
+        for(int a=0;a<aktien.size();a++) {
+            marke = aktien.get(a);
 
-        javaFXTreemap=javaFX(anzahlGrafik);
-        Application.launch(args);
+            String URL = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=" + marke + "&outputsize=full&apikey=WEO2Z2E1M7UWU3QXX";
+            JSONObject json = new JSONObject(IOUtils.toString(new URL(URL), Charset.forName("UTF-8")));
+            o = json.getJSONObject("Time Series (Daily)");
 
+            for (int i = 0; i < o.length(); i++) {
+                dates.add(o.names().get(i).toString());
+            }
+            Collections.sort(dates);
+            for (int i = 0; i < dates.size(); i++) {
+                String temp = dates.get(i);
+                aktienPreiseTreemap.put(LocalDate.parse(temp), getWert(temp));
+            }
+            CreateTable();
+            Datenbankeintrag();
+
+            /*System.out.println("Table ausgeben?");
+            if (reader.next().equals("ja")) {
+                Datenbankausgabe();
+            }*/
+
+            Gleitdurchschnitt(gleitdurchschnittAnzahl);
+
+            Map<LocalDate, Double> letztexmal2Werte = GetLetztexMal2Werte(anzahlGrafik);
+            List<Double> letztexmal2WerteDouble = treeMapZuGeordnetenListe(letztexmal2Werte);
+
+            JavaFXGleitdurchschnitt = GleitdurchschnittList(letztexmal2WerteDouble);
+
+            javaFXTreemap = javaFX(anzahlGrafik);
+            System.out.println("fertig mit "+marke);
+            Application.launch(args);
+        }
     }
     private static double getWert (String key) throws JSONException {
 
@@ -136,7 +141,6 @@ public class Aktien extends Application{
         String Wert = jsonO.getString("5. adjusted close");
         return Double.parseDouble(Wert);
     }
-
     private static void CreateTable(){
         try {
             System.out.println("* Treiber laden");
@@ -323,15 +327,6 @@ public class Aktien extends Application{
         }
         return fertige;
     }
-    public void saveAsPng(LineChart lineChart, String path) {
-        WritableImage image = lineChart.snapshot(new SnapshotParameters(), null);
-        File file = new File(path);
-        try {
-            ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
     private static List<String> ladeDatei(String datName) {
         List<String> fertige = new ArrayList<>();
         File file = new File(datName);
@@ -356,5 +351,14 @@ public class Aktien extends Application{
                 }
         }
         return fertige;
+    }
+    public void saveAsPng(LineChart lineChart, String path) {
+        WritableImage image = lineChart.snapshot(new SnapshotParameters(), null);
+        File file = new File(path);
+        try {
+            ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
