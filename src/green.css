@@ -1,5 +1,5 @@
-chart-plot-background{
-    -fx-background-color: #75d948;
+.chart-plot-background{
+    -fx-background-color: #00FF00;
 }
 .chart-vertical-grid-lines{
     -fx-stroke:transparent;

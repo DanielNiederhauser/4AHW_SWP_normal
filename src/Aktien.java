@@ -1,11 +1,18 @@
 import javafx.application.Application;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.*;
+import javafx.scene.image.WritableImage;
 import javafx.stage.Stage;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.imageio.ImageIO;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -45,8 +52,7 @@ public class Aktien extends Application{
         XYChart.Series series = new XYChart.Series();
         XYChart.Series series1 = new XYChart.Series();
 
-        series.setName("Close Werte");
-        series1.setName("Gleitdurchschnitt");
+
 
         int a=0;
         for (LocalDate i : javaFXTreemap.keySet()) {
@@ -55,18 +61,23 @@ public class Aktien extends Application{
             a++;
         }
 
-        if(gleitdurchschnitt>getLastCloseWert()){
-            lineChart.setStyle("-fx-background-color: #FF0000;");
-        }
-        else {
-            lineChart.setStyle("-fx-background-color: #00FF00;");
-
-        }
 
         Scene scene  = new Scene(lineChart,1300,800);
         lineChart.getData().add(series);
         lineChart.getData().add(series1);
         lineChart.setCreateSymbols(false);
+
+        if(gleitdurchschnitt>getLastCloseWert()){
+            scene.getStylesheets().add("red.css");
+        }
+        else {
+            scene.getStylesheets().add("green.css");
+
+        }
+        scene.getStylesheets().add("lineFarben.css");
+
+        series.setName("Close Werte");
+        series1.setName("Gleitdurchschnitt");
 
         stage.setScene(scene);
         stage.show();
@@ -76,11 +87,15 @@ public class Aktien extends Application{
     static int anzahlGrafik;
     static JSONObject o;
     static Scanner reader = new Scanner(System.in);
+    static LocalDate startdatum;
     public static void main(String[] args) throws IOException, SQLException {
         System.out.println("Von welcher Marke wollen Sie den Aktienkurs wissen?[TSLA, AAPL, AMZN, ...]");
         marke = reader.next();
 
-        String URL = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol="+marke+"&outputsize=full&apikey=WEO2Z2E1M7UWU3QXX";
+        System.out.println("Von welchem Datum rückwirkend? [1999-11-01]");
+         startdatum= LocalDate.parse(reader.next());
+
+        String URL = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol="+marke+"&outputsize=full&apikey=WEO2Z2E1M7UWU3QXX";
         JSONObject json = new JSONObject(IOUtils.toString(new URL(URL), Charset.forName("UTF-8")));
         o = json.getJSONObject("Time Series (Daily)");
 
@@ -118,7 +133,7 @@ public class Aktien extends Application{
     private static double getWert (String key) throws JSONException {
 
         JSONObject jsonO = (JSONObject) o.get(key);
-        String Wert = jsonO.getString("4. close");
+        String Wert = jsonO.getString("5. adjusted close");
         return Double.parseDouble(Wert);
     }
 
@@ -170,7 +185,7 @@ public class Aktien extends Application{
         try {
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
-            ResultSet reSe=myStat.executeQuery("Select * from "+marke);
+            ResultSet reSe=myStat.executeQuery("Select * from "+marke+" where Datum < '" + startdatum+ "';");
             System.out.println("Datum                   Wert");
             while(reSe.next()){
                 String zeit = reSe.getString("Datum");
@@ -197,8 +212,9 @@ public class Aktien extends Application{
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
 
-            ResultSet reSe=myStat.executeQuery("SELECT round(AVG(wert),2) as 'Durchschnitt' FROM (SELECT wert FROM "+marke+" ORDER BY Datum DESC LIMIT "
-                    +anzahlGleitdurchschnitt+") as t;");
+            String sql = "SELECT round(AVG(wert),2) as 'Durchschnitt' FROM (SELECT wert FROM "+marke+" where Datum <'"+startdatum+"' ORDER BY Datum DESC LIMIT "
+                    +anzahlGleitdurchschnitt+") as t;";
+            ResultSet reSe=myStat.executeQuery(sql);
             if (reSe.next()) {
                 String gleitdurchschnittString = reSe.getString(1);
                 gleitdurchschnitt=Double.parseDouble(gleitdurchschnittString);
@@ -216,7 +232,7 @@ public class Aktien extends Application{
         try {
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
-            ResultSet reSe=myStat.executeQuery("Select * from "+marke +" order by Datum DESC Limit "+anzahl);
+            ResultSet reSe=myStat.executeQuery("Select * from "+marke +" where Datum < '"+startdatum+"' order by Datum DESC Limit "+anzahl+ ";");
             while(reSe.next()){
                 String datum = reSe.getString("Datum");
                 String Wert = reSe.getString("Wert");
@@ -242,7 +258,8 @@ public class Aktien extends Application{
         try {
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
-            ResultSet reSe=myStat.executeQuery("Select Wert from "+marke +" order by Datum DESC limit 1");
+            String sql = "Select Wert from "+marke +" where Datum < '"+startdatum+"' order by Datum DESC limit 1 "+";";
+            ResultSet reSe=myStat.executeQuery(sql);
             if (reSe.next()) {
                 String temp = reSe.getString(1);
                 letzterCloseWert=Double.parseDouble(temp);
@@ -264,7 +281,8 @@ public class Aktien extends Application{
 
             Connection conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
-            ResultSet reSe=myStat.executeQuery("Select * from "+marke +" order by Datum desc limit "+(anzahl+gleitdurchschnittAnzahl)+ ";");
+            ResultSet reSe=myStat.executeQuery("Select * from "+marke +" where Datum < '"+startdatum+"' order by Datum desc limit "+
+                    (anzahl+gleitdurchschnittAnzahl)+";");
             while(reSe.next()){
                 String datum = reSe.getString("Datum");
                 String Wert = reSe.getString("Wert");
@@ -302,6 +320,40 @@ public class Aktien extends Application{
         List<Double> fertige= new ArrayList<Double>();
         for (LocalDate i : treemap.keySet()) {
             fertige.add(treemap.get(i));
+        }
+        return fertige;
+    }
+    public void saveAsPng(LineChart lineChart, String path) {
+        WritableImage image = lineChart.snapshot(new SnapshotParameters(), null);
+        File file = new File(path);
+        try {
+            ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    private static List<String> ladeDatei(String datName) {
+        List<String> fertige = new ArrayList<>();
+        File file = new File(datName);
+
+        if (!file.canRead() || !file.isFile())
+            System.exit(0);
+
+        BufferedReader in = null;
+        try {
+            in = new BufferedReader(new FileReader(datName));
+            String zeile = null;
+            while ((zeile = in.readLine()) != null) {
+                fertige.add(zeile);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (in != null)
+                try {
+                    in.close();
+                } catch (IOException e) {
+                }
         }
         return fertige;
     }

@@ -1,5 +1,5 @@
 .chart-plot-background{
-    -fx-background-color: #f36262;
+    -fx-background-color: #FF0000;
 }
 .chart-vertical-grid-lines{
     -fx-stroke:transparent;
@@ -7,3 +7,4 @@
 .chart-horizontal-grid-lines{
     -fx-stroke:transparent;
 }
+
