@@ -1,10 +1,20 @@
   
-Aktienprogramm Niederhauser Daniel:
+**Aktienprogramm Niederhauser Daniel:**
 Mithilfe dieses Programmes ist es möglich, Aktienwerte auszulesen und zu verarbeiten.
-Es findet zuerst ein API-Aufruf statt, wo die alle Aktienwerte eines vom Benutzer ausgewählten Unternehmens 
-abgerufen werden und dann in der Datenbank "Java" in einen eigenen Table gespeichert werden (Falls der Table noch nicht existiert,
-wird er erstellt). Dann wird der Benutzer gefragt, ob er sich den Table ausgeben lassen will. Nachdem gibt der Benutzer den gewünschten Gleitdurchschnitt z.B. 200 an.
-Anschließend gibt der Benutzer noch die gewünschte Datenmenge an, welche er danach sehen will z.B. 500.
-Abschließend wird noch die Grafik angezeigt und wenn der letzte Close-Wert größer, als der aktuelle Gleitdurchschnitt ist, grün eingefärbt, und wenn er kleiner ist, rot. 
+
+**Benutzer:**
+Zuerst wird der Benutzer nach dem gewünschten Gleitdurchschnitt z.B. 200 gefragt. Danach muss er noch sagen, wiviele Daten er in der Datei sehen will und von welchem Datum 
+rückwirkend. 
+
+**Funktionsweise:**
+Es findet zuerst ein API-Aufruf statt, wo alle Aktienwerte von ausgewählten Unternehmens welche in einer Textdatei abgespeichert sind
+abgerufen werden und dann in der Datenbank "Java" in einem eigenen Table abgespeichert werden (Falls der Table noch nicht existiert,
+wird er erstellt). Anschließend wird der Gleitdurchschnitt berechnet und abgespeichert. Danach werden die benötigten Werte aus der Datenbank geholt.
+Zum Beispiel wenn der Benutzer den 200er Durchschnitt der letzten 1000 Tage haben will, werden die letzten 1200 Datenbankeinträge benötigt. 
+Anschließend werden zwei Listen, eine für die normalen Daten der letzen 1000 Tage und eine Liste mit dem Gleitdurchschnitt der letzten 1000 Tage in ein 
+JavaFX Diagramm gezeichnet und wenn der letzte Close-Wert größer, als der Gleitdurchschnitt der letzen 200 Tage ist, wird das Chart grün eingefärbt und andernfalls
+rot. Als letzten Schritt wird das Chart noch abgespeichert. Das ganze wiederholt sich so lange, bis alle Aktien der Textdatei verarbeitet wurden.
+
+
 
 
