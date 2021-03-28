@@ -15,6 +15,7 @@ Anschließend werden zwei Listen, eine für die normalen Daten der letzen 1000 T
 JavaFX Diagramm gezeichnet und wenn der letzte Close-Wert größer, als der Gleitdurchschnitt der letzen 200 Tage ist, wird das Chart grün eingefärbt und andernfalls
 rot. Als letzten Schritt wird das Chart noch abgespeichert. Das ganze wiederholt sich so lange, bis alle Aktien der Textdatei verarbeitet wurden.
 
+Wie solch ein Bild aussehen könnte sieht man in /src/AktienBilder
 
 
 
