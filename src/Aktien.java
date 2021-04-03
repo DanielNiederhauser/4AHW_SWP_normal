@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.List;
 
+
 //Primarykey muss Datum sein
 
 public class Aktien extends Application{
@@ -31,7 +32,7 @@ public class Aktien extends Application{
     final static String password = "java";
 
     //Die Liste der letzten x Einträge aus der Datenbank, wobei x vom Benutzer eingegeben wird
-    static Map<LocalDate, Double> javaFXTreemap = new TreeMap<LocalDate, Double>();
+    static TreeMap<LocalDate, Double> javaFXTreemap = new TreeMap<LocalDate, Double>();
     static List<Double> JavaFXGleitdurchschnitt = new ArrayList<Double>();
     //Die Liste der letzten 100 aus der API
     static Map<LocalDate, Double> aktienPreiseTreemap = new TreeMap<LocalDate, Double>();
@@ -39,70 +40,16 @@ public class Aktien extends Application{
     static int gleitdurchschnittAnzahl;
     static Double letzterCloseWert;
     static Connection conn = null;
-    static String marke;
+    private static String marke;
 
 
-    @Override public void start(Stage stage) {
-        stage.setTitle("Aktienkurs");
-        final CategoryAxis xAxis = new CategoryAxis();
-        final NumberAxis yAxis = new NumberAxis();
-        xAxis.setLabel("Tag");
-        final LineChart<String,Number> lineChart = new LineChart<String, Number>(xAxis,yAxis);
-        lineChart.setTitle("Aktienkurs "+ marke.toUpperCase());
-        XYChart.Series series = new XYChart.Series();
-        XYChart.Series series1 = new XYChart.Series();
-
-
-
-        int a=0;
-        for (LocalDate i : javaFXTreemap.keySet()) {
-            series.getData().addAll(new XYChart.Data(i.toString(), javaFXTreemap.get(i)));
-            series1.getData().addAll(new XYChart.Data(i.toString(), JavaFXGleitdurchschnitt.get(a)));
-            a++;
-        }
-
-
-        Scene scene  = new Scene(lineChart,1300,800);
-        lineChart.getData().add(series);
-        lineChart.getData().add(series1);
-        lineChart.setCreateSymbols(false);
-
-        if(gleitdurchschnitt>getLastCloseWert()){
-            scene.getStylesheets().add("red.css");
-        }
-        else {
-            scene.getStylesheets().add("green.css");
-
-        }
-        scene.getStylesheets().add("lineFarben.css");
-
-        series.setName("Close Werte");
-        series1.setName("Gleitdurchschnitt");
-
-        saveAsPng(lineChart, "src//Bilder//"+marke.toUpperCase()+"_"+LocalDate.now()+".png");
-        stage.setScene(scene);
-        stage.show();
-    }
-
-    static List<String> dates = new ArrayList<>();
-    static int anzahlGrafik;
-    static JSONObject o;
-    static Scanner reader = new Scanner(System.in);
-    static LocalDate startdatum;
-    public static void main(String[] args) throws IOException, SQLException {
+    @Override public void start(Stage stage) throws Exception{
         List<String> aktien = ladeDatei("src/AktienListe.txt");
 
-        System.out.print("Wieviele der letzten Einträge sollen für den Gleidurchschnitt verwendet werden? " );
-        gleitdurchschnittAnzahl=reader.nextInt();
 
-        System.out.print("Wieviele der letzten Einträge wollen Sie in der Grafik sehen? ");
-        anzahlGrafik = reader.nextInt();
-
-        System.out.print("Von welchem Datum rückwirkend? [1999-11-01]");
-        startdatum = LocalDate.parse(reader.next());
-        for(int a=0;a<aktien.size();a++) {
+        for(int a=0;a<aktien.size();a++){
             marke = aktien.get(a);
-
+            //A4RM4YPCEWJ1VANI3
             String URL = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=" + marke + "&outputsize=full&apikey=WEO2Z2E1M7UWU3QXX";
             JSONObject json = new JSONObject(IOUtils.toString(new URL(URL), Charset.forName("UTF-8")));
             o = json.getJSONObject("Time Series (Daily)");
@@ -125,15 +72,90 @@ public class Aktien extends Application{
 
             Gleitdurchschnitt(gleitdurchschnittAnzahl);
 
-            Map<LocalDate, Double> letztexmal2Werte = GetLetztexMal2Werte(anzahlGrafik);
+            Map<LocalDate, Double> letztexmal2Werte = GetAlleWerteFuerGleitdurchschnitt(anzahlGrafik);
             List<Double> letztexmal2WerteDouble = treeMapZuGeordnetenListe(letztexmal2Werte);
 
             JavaFXGleitdurchschnitt = GleitdurchschnittList(letztexmal2WerteDouble);
 
-            javaFXTreemap = javaFX(anzahlGrafik);
+            javaFXTreemap = javaFXWerteNormal(anzahlGrafik);
+
+            stage.setTitle("Aktienkurs");
+            final CategoryAxis xAxis = new CategoryAxis();
+            final NumberAxis yAxis = new NumberAxis();
+            xAxis.setLabel("Tag");
+            final LineChart<String,Number> lineChart = new LineChart<String, Number>(xAxis,yAxis);
+            lineChart.setTitle("Aktienkurs "+ marke.toUpperCase());
+            XYChart.Series series = new XYChart.Series();
+            XYChart.Series series1 = new XYChart.Series();
+
+            //
+            /*for(Map.Entry e : javaFXTreemap.entrySet()){
+                System.out.println(e.getKey() + " = " +e.getValue());
+            }
+            for(int z = 0; z<JavaFXGleitdurchschnitt.size();z++){
+                System.out.println("Gleitdurchschnitt: "+ JavaFXGleitdurchschnitt.get(z));
+            }*/
+            //
+            int b=0;
+            for (LocalDate i : javaFXTreemap.keySet()) {
+                series.getData().addAll(new XYChart.Data(i.toString(), javaFXTreemap.get(i)));
+                series1.getData().addAll(new XYChart.Data(i.toString(), JavaFXGleitdurchschnitt.get(b)));
+                b++;
+            }
+            System.out.println("Letzer Eintrag normal: " +javaFXTreemap.get(javaFXTreemap.lastKey()));
+            System.out.println("Letzer Eintrag Gleitdurchschnitt: "+ JavaFXGleitdurchschnitt.get(JavaFXGleitdurchschnitt.size()-1));
+
+
+            Scene scene  = new Scene(lineChart,1300,800);
+
+
+
+            lineChart.getData().add(series);
+            lineChart.getData().add(series1);
+            lineChart.setCreateSymbols(false);
+
+            if(JavaFXGleitdurchschnitt.get(JavaFXGleitdurchschnitt.size()-1)>getLastCloseWert()){
+                scene.getStylesheets().add("red.css");
+            }
+            else {
+                scene.getStylesheets().add("green.css");
+
+            }
+            scene.getStylesheets().add("lineFarben.css");
+
+            series.setName("Close Werte");
+            series1.setName("Gleitdurchschnitt");
+
+            saveAsPng(lineChart, "src//Bilder//"+marke.toUpperCase()+"_"+LocalDate.now()+".png");
+            stage.setScene(scene);
+            stage.show();
+            stage.close();
             System.out.println("fertig mit "+marke);
-            Application.launch(args);
+            System.out.println();
         }
+
+    }
+
+
+
+    static List<String> dates = new ArrayList<>();
+    static int anzahlGrafik;
+    static JSONObject o;
+    static Scanner reader = new Scanner(System.in);
+    static LocalDate startdatum;
+    public static void main(String[] args) throws IOException, SQLException {
+
+        System.out.print("Wieviele der letzten Einträge sollen für den Gleidurchschnitt verwendet werden? " );
+        gleitdurchschnittAnzahl=reader.nextInt();
+
+        System.out.print("Wieviele der letzten Einträge wollen Sie in der Grafik sehen? ");
+        anzahlGrafik = reader.nextInt();
+
+        System.out.print("Von welchem Datum rückwirkend? [1999-10-01]");
+        startdatum = LocalDate.parse(reader.next());
+
+        Application.launch(args);
+
     }
     private static double getWert (String key) throws JSONException {
 
@@ -143,7 +165,6 @@ public class Aktien extends Application{
     }
     private static void CreateTable(){
         try {
-            System.out.println("* Treiber laden");
             Class.forName("com.mysql.jdbc.Driver");
         }
         catch (Exception e) {
@@ -151,7 +172,6 @@ public class Aktien extends Application{
             e.printStackTrace();
         }
         try {
-            System.out.println("* Verbindung aufbauen");
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
             System.out.println("* Tabelle "+marke+" erstellen, falls nicht vorhanden");
@@ -228,8 +248,8 @@ public class Aktien extends Application{
             System.out.println("SQL Fehler Gleitdurchschnitt");
         }
     }
-    private static Map<LocalDate, Double> javaFX(int anzahl){
-        Map<LocalDate, Double> treeMap = new TreeMap<LocalDate, Double>();
+    private static TreeMap<LocalDate, Double> javaFXWerteNormal(int anzahl){
+        TreeMap<LocalDate, Double> treeMap = new TreeMap<LocalDate, Double>();
 
         Connection conn = null;
 
@@ -279,7 +299,7 @@ public class Aktien extends Application{
         }
         return letzterCloseWert;
     }
-    private static Map<LocalDate, Double> GetLetztexMal2Werte(int anzahl){
+    private static Map<LocalDate, Double> GetAlleWerteFuerGleitdurchschnitt(int anzahl){
         try {
             Map<LocalDate, Double> treeMap = new TreeMap<LocalDate, Double>();
 
@@ -306,13 +326,13 @@ public class Aktien extends Application{
         }
         return null;
     }
-    public static List<Double> GleitdurchschnittList(List<Double> letzteXmal2Daten){
+    public static List<Double> GleitdurchschnittList(List<Double> anzahlPlusGleitdurchschnittanzahl){
         List<Double> JavaFXGleitdurchschnitt= new ArrayList<>();
         double Wert=0;
 
-        for(int i = 0;i<letzteXmal2Daten.size()-gleitdurchschnittAnzahl;i++){
+        for(int i = 0;i<anzahlPlusGleitdurchschnittanzahl.size()-gleitdurchschnittAnzahl;i++){
             for(int j=i;j<gleitdurchschnittAnzahl+i;j++){
-                Wert+=letzteXmal2Daten.get(j);
+                Wert+=anzahlPlusGleitdurchschnittanzahl.get(j);
             }
             JavaFXGleitdurchschnitt.add(Wert/gleitdurchschnittAnzahl);
 
@@ -321,7 +341,7 @@ public class Aktien extends Application{
         return JavaFXGleitdurchschnitt;
     }
     public static List<Double> treeMapZuGeordnetenListe(Map<LocalDate, Double> treemap){
-        List<Double> fertige= new ArrayList<Double>();
+        List<Double> fertige = new ArrayList<Double>();
         for (LocalDate i : treemap.keySet()) {
             fertige.add(treemap.get(i));
         }
