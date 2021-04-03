@@ -21,7 +21,6 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.List;
 
-
 //Primarykey muss Datum sein
 
 public class Aktien extends Application{
@@ -45,7 +44,6 @@ public class Aktien extends Application{
 
     @Override public void start(Stage stage) throws Exception{
         List<String> aktien = ladeDatei("src/AktienListe.txt");
-
 
         for(int a=0;a<aktien.size();a++){
             marke = aktien.get(a);
@@ -104,11 +102,8 @@ public class Aktien extends Application{
             }
             System.out.println("Letzer Eintrag normal: " +javaFXTreemap.get(javaFXTreemap.lastKey()));
             System.out.println("Letzer Eintrag Gleitdurchschnitt: "+ JavaFXGleitdurchschnitt.get(JavaFXGleitdurchschnitt.size()-1));
-
-
+            
             Scene scene  = new Scene(lineChart,1300,800);
-
-
 
             lineChart.getData().add(series);
             lineChart.getData().add(series1);
@@ -133,10 +128,7 @@ public class Aktien extends Application{
             System.out.println("fertig mit "+marke);
             System.out.println();
         }
-
     }
-
-
 
     static List<String> dates = new ArrayList<>();
     static int anzahlGrafik;
