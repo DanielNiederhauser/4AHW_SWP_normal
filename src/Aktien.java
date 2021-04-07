@@ -44,11 +44,11 @@ public class Aktien extends Application{
 
     @Override public void start(Stage stage) throws Exception{
         List<String> aktien = ladeDatei("src/AktienListe.txt");
+        String apiKey = ladeKey("src/APIKey.txt");
 
         for(int a=0;a<aktien.size();a++){
             marke = aktien.get(a);
-            //A4RM4YPCEWJ1VANI3
-            String URL = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=" + marke + "&outputsize=full&apikey=WEO2Z2E1M7UWU3QXX";
+            String URL = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=" + marke + "&outputsize=full&apikey="+apiKey;
             JSONObject json = new JSONObject(IOUtils.toString(new URL(URL), Charset.forName("UTF-8")));
             o = json.getJSONObject("Time Series (Daily)");
 
@@ -102,7 +102,7 @@ public class Aktien extends Application{
             }
             System.out.println("Letzer Eintrag normal: " +javaFXTreemap.get(javaFXTreemap.lastKey()));
             System.out.println("Letzer Eintrag Gleitdurchschnitt: "+ JavaFXGleitdurchschnitt.get(JavaFXGleitdurchschnitt.size()-1));
-            
+
             Scene scene  = new Scene(lineChart,1300,800);
 
             lineChart.getData().add(series);
@@ -129,6 +129,8 @@ public class Aktien extends Application{
             System.out.println();
         }
     }
+
+
 
     static List<String> dates = new ArrayList<>();
     static int anzahlGrafik;
@@ -363,6 +365,32 @@ public class Aktien extends Application{
                 }
         }
         return fertige;
+    }
+    private static String ladeKey(String path) {
+        File file = new File(path);
+        String key="";
+
+        if (!file.canRead() || !file.isFile())
+            System.exit(0);
+
+        BufferedReader in = null;
+        try {
+            in = new BufferedReader(new FileReader(path));
+            String zeile = null;
+            if ((zeile = in.readLine()) != null) {
+                key = zeile;
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (in != null)
+                try {
+                    in.close();
+                } catch (IOException e) {
+                }
+        }
+        return key;
     }
     public void saveAsPng(LineChart lineChart, String path) {
         WritableImage image = lineChart.snapshot(new SnapshotParameters(), null);
