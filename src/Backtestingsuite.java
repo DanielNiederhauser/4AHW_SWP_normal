@@ -9,30 +9,36 @@ public class Backtestingsuite {
     final static String password = "java";
 
     static LocalDate Kaufzeitpunkt =LocalDate.of(2017,01,01);
-    static int Aktiendepot=100000;
+    static double Aktiendepot=100000;
     static String aktie="TSLA";
     static Double einkaufswert = null;
     static LocalDate einkaufsdatum =null;
     static int AnzahlAktien;
     static double Wert200;
+    static LocalDate letztesDatumInDB;
 
     static Double verkaufswert = null;
     static LocalDate verkaufsdatum = null;
     static Boolean einkauf = null;
+    static int einkaufszaehler=0, verkaufszaehler=0;
 
     public static void main(String[] args) {
-        einkauf=true;
-        getWertUndDatumGroesser200erSchnittEinkauf();
-        einkaufen();
-        System.out.println(AnzahlAktien);
+        letztesDatumInDB = getLetztesDBDatum();
 
-        /*while (letzerCloseWert<=vergleich){
-            getCloseWert()
-        }*/
-        System.out.println(einkaufswert + "---"+ einkaufsdatum+ "---"+Wert200);
-        einkauf = false;
-        getWertUndDatumGroesser200erSchnittEinkauf();
-        System.out.println(einkaufswert + "---"+ einkaufsdatum+ "---"+Wert200);
+            einkauf = true;
+            getWertUndDatumGroesserOderKleiner200erSchnitt();
+            einkaufen();
+            System.out.println("Erstes Datum und Wert: " + einkaufswert + " " + einkaufsdatum);
+            System.out.println("Anzahl Aktien: " + AnzahlAktien);
+
+
+            System.out.println("Einkauf: " + einkaufswert + "---" + einkaufsdatum + "---" + get200erwertEinkauf());
+            einkauf = false;
+            getWertUndDatumGroesserOderKleiner200erSchnitt();
+            System.out.println("Verkauf: " + einkaufswert + "---" + einkaufsdatum + "---" + get200erwertEinkauf());
+            Aktiendepot=AnzahlAktien*einkaufswert;
+            System.out.println("Depotwert: "+Aktiendepot);
+
     }
     static void getDatumUndClosewertEinkauf(int daysToAdd){
         Connection conn = null;
@@ -46,7 +52,7 @@ public class Backtestingsuite {
             }
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
-            String sql = "Select * from "+aktie +" where Datum > '"+ temp.plusDays(daysToAdd)+"' order by Datum limit 1;";
+            String sql = "Select * from "+aktie +" where Datum >= '"+ temp.plusDays(daysToAdd)+"' order by Datum limit 1;";
             //Select count(Wert) from tsla where Datum < '2021-04-21';
             ResultSet reSe=myStat.executeQuery(sql);
             if (reSe.next()) {
@@ -71,7 +77,7 @@ public class Backtestingsuite {
         try {
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
-            String sql = "Select Wert from "+aktie +"_200schnitt where Datum = '"+einkaufsdatum+"';";
+            String sql = "Select * from "+aktie +"_200schnitt where Datum = '"+einkaufsdatum+"';";
             ResultSet reSe=myStat.executeQuery(sql);
             if (reSe.next()) {
                 Wert200=reSe.getDouble("Wert");
@@ -86,7 +92,7 @@ public class Backtestingsuite {
         }
         return Wert200;
     }
-    static void getWertUndDatumGroesser200erSchnittEinkauf(){
+    static void getWertUndDatumGroesserOderKleiner200erSchnitt(){
 
         if(einkauf==true){
             int zaehler=0;
@@ -95,6 +101,7 @@ public class Backtestingsuite {
                 zaehler++;
                 Wert200=get200erwertEinkauf();
             }while(einkaufswert <= Wert200);
+            System.out.println(zaehler);
         }
         else if(einkauf == false){
             int zaehler=0;
@@ -104,8 +111,32 @@ public class Backtestingsuite {
                 zaehler++;
                 Wert200=get200erwertEinkauf();
             }while(einkaufswert >= Wert200);
+            System.out.println(zaehler);
         }
 
+    }
+    static LocalDate getLetztesDBDatum(){
+        LocalDate ld = null;
+        Connection conn = null;
+        double Wert200=0.0;
+        try {
+            conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
+            Statement myStat = conn.createStatement();
+            String sql = "Select Datum from "+aktie +"_200schnitt order by Datum desc limit 1;";
+            ResultSet reSe=myStat.executeQuery(sql);
+            if (reSe.next()) {
+                ld=LocalDate.parse(reSe.getString("Datum"));
+            }
+            conn.close();
+        }
+        catch (SQLException sqle) {
+            System.out.println("SQLException: " + sqle.getMessage());
+            System.out.println("SQLState: " + sqle.getSQLState());
+            System.out.println("VendorError: " + sqle.getErrorCode());
+            sqle.printStackTrace();
+        }
+
+        return ld;
     }
 
     static void einkaufen() {

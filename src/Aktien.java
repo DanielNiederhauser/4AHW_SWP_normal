@@ -21,6 +21,8 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.List;
 
+//Primarykey muss Datum sein
+
 public class Aktien extends Application{
 
     final static String hostname = "localhost";
@@ -28,18 +30,22 @@ public class Aktien extends Application{
     final static String user = "java";
     final static String password = "java";
 
-
+    //Die Liste der letzten x Einträge aus der Datenbank, wobei x vom Benutzer eingegeben wird
     static TreeMap<LocalDate, Double> javaFXTreemap = new TreeMap<LocalDate, Double>();
     static List<Double> JavaFXGleitdurchschnitt = new ArrayList<Double>();
-
+    //Die Liste der letzten 100 aus der API
     static Map<LocalDate, Double> aktienPreiseTreemap = new TreeMap<LocalDate, Double>();
-    static Map<LocalDate, Double> aktienPreiseTreemapSplitcorr = new TreeMap<LocalDate, Double>();
+    static Map<LocalDate, Double> aktienPreiseTreemapBerechnet = new TreeMap<LocalDate, Double>();
+    static Map<LocalDate, Double> Splitmap = new TreeMap<>();
 
     static Double gleitdurchschnitt;
     static int gleitdurchschnittAnzahl;
     static Double letzterCloseWert;
     static Connection conn = null;
     private static String marke;
+    private static Double split=1.0;
+    static Map<LocalDate, Double> gleitdurchschnittTreemap = new TreeMap<>();
+    static List<LocalDate> LocaldateListeGleitdurchschnitt = new ArrayList<>();
 
 
     @Override public void start(Stage stage) throws Exception{
@@ -60,22 +66,45 @@ public class Aktien extends Application{
                 String temp = dates.get(i);
                 aktienPreiseTreemap.put(LocalDate.parse(temp), getWert(temp));
             }
+            CreateTableRohdaten();
+            DatenbankeintragRohdaten();
+            System.out.println("Rohdateien fertig!");
+
+            splitkorriegieren();
             CreateTable();
             Datenbankeintrag();
+            System.out.println("DB Eintrag fertig");
+            System.out.println();
 
-            /*System.out.println("Table ausgeben?");
-            if (reader.next().equals("ja")) {
-                Datenbankausgabe();
-            }*/
 
-           // Gleitdurchschnitt(gleitdurchschnittAnzahl);
 
-            Map<LocalDate, Double> letztexmal2Werte = GetAlleWerteFuerGleitdurchschnitt(anzahlGrafik);
-            List<Double> letztexmal2WerteDouble = treeMapZuGeordnetenListe(letztexmal2Werte);
+            letztexDatums();
+            //System.out.println("LocaldateListeGleitdurchschnitt size: "+ LocaldateListeGleitdurchschnitt.size());
 
-            JavaFXGleitdurchschnitt = GleitdurchschnittList(letztexmal2WerteDouble);
+            Collections.sort(LocaldateListeGleitdurchschnitt);
 
-            javaFXTreemap = javaFXWerteNormal();
+            Map<LocalDate, Double> TreemapAlleFuerGleitdurchschnitt = GetAlleWerteFuerGleitdurchschnitt();
+            //System.out.println("TreemapAlleFuerGleitdurchschnitt:" +TreemapAlleFuerGleitdurchschnitt.size());
+            //macht eine Treemap von Werten, die später für die Berechnung der Double Liste für den Graphen gebraucht  wird
+            //macht eine Double Liste wo die Werte in der richtigen Reihenfolge (dem Datum nach) sind
+            List<Double> DoubleListeUnberechnet = treeMapZuGeordnetenDoubleListe(TreemapAlleFuerGleitdurchschnitt);
+            //System.out.println("DoublelisteUnberechnet size: "+ DoubleListeUnberechnet.size());
+            //Berechnete Gleitdurchschnittliste
+            JavaFXGleitdurchschnitt = GleitdurchschnittList(DoubleListeUnberechnet);
+            //System.out.println("JavaFXGleitdurchschnitt size: "+ JavaFXGleitdurchschnitt.size());
+            //System.out.println(JavaFXGleitdurchschnitt);
+            //db eintrag
+            fertigeGleitdurchschnittTreemap();
+
+
+
+            CreateTableGleitdurchschnitt();
+            //System.out.println("Gleitdurchschnittlist"+gleitdurchschnittTreemap);
+            //System.out.println("Size: "+ gleitdurchschnittTreemap.size());
+            DatenbankeintragxSchnitt();
+
+            //Liste für normalen Graphen also den, wo nicht der x Schnitt ist
+            javaFXTreemap = javaFXWerteNormal(anzahlGrafik);
 
             stage.setTitle("Aktienkurs");
             final CategoryAxis xAxis = new CategoryAxis();
@@ -86,20 +115,22 @@ public class Aktien extends Application{
             XYChart.Series series = new XYChart.Series();
             XYChart.Series series1 = new XYChart.Series();
 
+            //
             /*for(Map.Entry e : javaFXTreemap.entrySet()){
                 System.out.println(e.getKey() + " = " +e.getValue());
             }
             for(int z = 0; z<JavaFXGleitdurchschnitt.size();z++){
                 System.out.println("Gleitdurchschnitt: "+ JavaFXGleitdurchschnitt.get(z));
             }*/
+            //
             int b=0;
             for (LocalDate i : javaFXTreemap.keySet()) {
                 series.getData().addAll(new XYChart.Data(i.toString(), javaFXTreemap.get(i)));
                 series1.getData().addAll(new XYChart.Data(i.toString(), JavaFXGleitdurchschnitt.get(b)));
                 b++;
             }
-            System.out.println("Letzer Eintrag normal: " +javaFXTreemap.get(javaFXTreemap.lastKey()));
-            System.out.println("Letzer Eintrag Gleitdurchschnitt: "+ JavaFXGleitdurchschnitt.get(JavaFXGleitdurchschnitt.size()-1));
+            //System.out.println("Letzer Eintrag normal: " +javaFXTreemap.get(javaFXTreemap.lastKey()));
+            //System.out.println("Letzer Eintrag Gleitdurchschnitt: "+ JavaFXGleitdurchschnitt.get(JavaFXGleitdurchschnitt.size()-1));
 
             Scene scene  = new Scene(lineChart,1300,800);
 
@@ -119,7 +150,7 @@ public class Aktien extends Application{
             series.setName("Close Werte");
             series1.setName("Gleitdurchschnitt");
 
-            saveAsPng(lineChart, "src//Bilder//"+marke.toUpperCase()+"_"+startdatum+".png");
+            saveAsPng(lineChart, "src//Bilder//"+marke.toUpperCase()+"_"+LocalDate.now()+".png");
             stage.setScene(scene);
             stage.show();
             stage.close();
@@ -128,11 +159,13 @@ public class Aktien extends Application{
         }
     }
 
+
+
     static List<String> dates = new ArrayList<>();
     static int anzahlGrafik;
     static JSONObject o;
     static Scanner reader = new Scanner(System.in);
-    static LocalDate startdatum = null, enddatum=null;
+    static LocalDate startdatum;
     public static void main(String[] args) throws IOException, SQLException {
 
         gleitdurchschnittAnzahl=200;
@@ -142,21 +175,23 @@ public class Aktien extends Application{
         //System.out.print("Von welchem Datum rückwirkend? [1999-10-01]");
         //startdatum = LocalDate.parse(reader.next());
 
-
+        startdatum=LocalDate.of(2017,01,01);
         if(startdatum==null){
-            startdatum=LocalDate.of(2021,01,01);
-        }
-        if(enddatum==null){
-            enddatum=LocalDate.now();
+            startdatum=LocalDate.now();
         }
         Application.launch(args);
-
     }
     private static double getWert (String key) throws JSONException {
 
         JSONObject jsonO = (JSONObject) o.get(key);
         String Wert = jsonO.getString("4. close");
         return Double.parseDouble(Wert);
+    }
+    private static Double getSplit (String key) throws JSONException {
+
+        JSONObject jsonO = (JSONObject) o.get(key);
+        String split = jsonO.getString("8. split coefficient");
+        return Double.parseDouble(split);
     }
     private static void CreateTable(){
         try {
@@ -171,7 +206,30 @@ public class Aktien extends Application{
             Statement myStat = conn.createStatement();
             System.out.println("* Tabelle "+marke+" erstellen, falls nicht vorhanden");
             String sql = "CREATE TABLE if not exists "+marke +
-                    "(Datum date, Wert double, PRIMARY KEY(Datum));";
+                    "(Datum date, Wert double, Split double, PRIMARY KEY(Datum));";
+            myStat.executeUpdate(sql);
+
+        }
+        catch (SQLException sqle) {
+            System.out.println("SQLException: " + sqle.getMessage());
+            System.out.println("SQLState: " + sqle.getSQLState());
+            System.out.println("VendorError: " + sqle.getErrorCode());
+            sqle.printStackTrace();
+        }
+    }
+    private static void CreateTableGleitdurchschnitt(){
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+        }
+        catch (Exception e) {
+            System.err.println("Unable to load driver.");
+            e.printStackTrace();
+        }
+        try {
+            conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
+            Statement myStat = conn.createStatement();
+            System.out.println("* Tabelle "+marke+"_"+gleitdurchschnittAnzahl+"Schnitt erstellen, falls nicht vorhanden");
+            String sql = "CREATE TABLE if not exists "+marke+"_"+gleitdurchschnittAnzahl+"Schnitt(Datum date, Wert double, PRIMARY KEY(Datum));";
             myStat.executeUpdate(sql);
 
         }
@@ -184,11 +242,79 @@ public class Aktien extends Application{
     }
     private static void Datenbankeintrag(){
         try {
+
+            conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
+            Statement myStat = conn.createStatement();
+
+            for (LocalDate i : aktienPreiseTreemapBerechnet.keySet()) {
+                String sql = "INSERT IGNORE INTO " + marke +" values('"+i+"',"+aktienPreiseTreemapBerechnet.get(i)+", "+Splitmap.get(i)+");";
+                myStat.execute(sql);
+            }
+
+        }
+        catch (SQLException sqle) {
+            System.out.println("SQLException: " + sqle.getMessage());
+            System.out.println("SQLState: " + sqle.getSQLState());
+            System.out.println("VendorError: " + sqle.getErrorCode());
+            sqle.printStackTrace();
+        }
+    }
+    private static void DatenbankeintragRohdaten(){
+        try {
+
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
 
             for (LocalDate i : aktienPreiseTreemap.keySet()) {
-                String sql = "Insert INTO " + marke +" values('"+i+"',"+aktienPreiseTreemap.get(i)+");";
+                String sql = "INSERT IGNORE INTO " + marke +"_ROH values('"+i+"',"+aktienPreiseTreemap.get(i)+");";
+                myStat.execute(sql);
+            }
+
+        }
+        catch (SQLException sqle) {
+            System.out.println("SQLException: " + sqle.getMessage());
+            System.out.println("SQLState: " + sqle.getSQLState());
+            System.out.println("VendorError: " + sqle.getErrorCode());
+            sqle.printStackTrace();
+        }
+    }
+    private static void fertigeGleitdurchschnittTreemap(){
+
+        for(int i=0;i<AnzahlDatenbankeintraege();i++){
+
+            gleitdurchschnittTreemap.put(LocaldateListeGleitdurchschnitt.get(i), JavaFXGleitdurchschnitt.get(i));
+        }
+
+    }
+    private static void letztexDatums(){
+
+        try {
+            conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
+            Statement myStat = conn.createStatement();
+            ResultSet reSe=myStat.executeQuery("Select * from "+marke+" order by Datum DESC limit "+(AnzahlDatenbankeintraege()+1)+";");
+            while(reSe.next()){
+                String zeit = reSe.getString("Datum");
+
+                LocaldateListeGleitdurchschnitt.add(LocalDate.parse(zeit));
+            }
+
+            conn.close();
+        }
+        catch (SQLException sqle) {
+            System.out.println("SQLException: " + sqle.getMessage());
+            System.out.println("SQLState: " + sqle.getSQLState());
+            System.out.println("VendorError: " + sqle.getErrorCode());
+            sqle.printStackTrace();
+        }
+    }
+    private static void DatenbankeintragxSchnitt(){
+        try {
+
+            conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
+            Statement myStat = conn.createStatement();
+
+            for (LocalDate i : gleitdurchschnittTreemap.keySet()) {
+                String sql = "INSERT IGNORE INTO " + marke +"_"+gleitdurchschnittAnzahl+"Schnitt values('"+i+"',"+gleitdurchschnittTreemap.get(i)+");";
                 myStat.execute(sql);
             }
 
@@ -226,24 +352,7 @@ public class Aktien extends Application{
         }
 
     }
-    /*private static void Gleitdurchschnitt(int anzahlGleitdurchschnitt) throws SQLException {
-        try{
-            conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
-            Statement myStat = conn.createStatement();
-
-            String sql = "SELECT round(AVG(wert),2) as 'Durchschnitt' FROM (SELECT wert FROM "+marke+" where Datum <'"+startdatum+"' ORDER BY Datum DESC LIMIT "
-                    +anzahlGleitdurchschnitt+") as t;";
-            ResultSet reSe=myStat.executeQuery(sql);
-            if (reSe.next()) {
-                String gleitdurchschnittString = reSe.getString(1);
-                gleitdurchschnitt=Double.parseDouble(gleitdurchschnittString);
-            }
-        }catch (SQLException e){
-            e.printStackTrace();
-            System.out.println("SQL Fehler Gleitdurchschnitt");
-        }
-    }*/
-    private static TreeMap<LocalDate, Double> javaFXWerteNormal(){
+    private static TreeMap<LocalDate, Double> javaFXWerteNormal(int anzahl){
         TreeMap<LocalDate, Double> treeMap = new TreeMap<LocalDate, Double>();
 
         Connection conn = null;
@@ -251,7 +360,7 @@ public class Aktien extends Application{
         try {
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
-            ResultSet reSe=myStat.executeQuery("Select * from "+marke +" where Datum > '"+startdatum+"' and Datum <'"+enddatum+"'order by Datum;");
+            ResultSet reSe=myStat.executeQuery("Select * from "+marke +" where Datum > '"+startdatum+"';");
             while(reSe.next()){
                 String datum = reSe.getString("Datum");
                 String Wert = reSe.getString("Wert");
@@ -294,13 +403,13 @@ public class Aktien extends Application{
         }
         return letzterCloseWert;
     }
-    private static Map<LocalDate, Double> GetAlleWerteFuerGleitdurchschnitt(int anzahl){
+    private static Map<LocalDate, Double> GetAlleWerteFuerGleitdurchschnitt(){
         try {
             Map<LocalDate, Double> treeMap = new TreeMap<LocalDate, Double>();
 
             Connection conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
-            ResultSet reSe=myStat.executeQuery("Select * from "+marke +" where Datum < '"+startdatum+"' and Datum > '"+enddatum+"' order by Datum desc;");
+            ResultSet reSe=myStat.executeQuery("Select * from "+marke +" order by Datum desc limit "+(AnzahlDatenbankeintraege()+gleitdurchschnittAnzahl)+";");
             while(reSe.next()){
                 String datum = reSe.getString("Datum");
                 String Wert = reSe.getString("Wert");
@@ -320,13 +429,13 @@ public class Aktien extends Application{
         }
         return null;
     }
-    public static List<Double> GleitdurchschnittList(List<Double> anzahlPlusGleitdurchschnittanzahl){
+    public static List<Double> GleitdurchschnittList(List<Double> unberechneteListe){
         List<Double> JavaFXGleitdurchschnitt= new ArrayList<>();
         double Wert=0;
 
-        for(int i = 0;i<anzahlPlusGleitdurchschnittanzahl.size()-gleitdurchschnittAnzahl;i++){
+        for(int i = 0;i<unberechneteListe.size()-gleitdurchschnittAnzahl;i++){
             for(int j=i;j<gleitdurchschnittAnzahl+i;j++){
-                Wert+=anzahlPlusGleitdurchschnittanzahl.get(j);
+                Wert+=unberechneteListe.get(j);
             }
             JavaFXGleitdurchschnitt.add(Wert/gleitdurchschnittAnzahl);
 
@@ -334,7 +443,7 @@ public class Aktien extends Application{
         }
         return JavaFXGleitdurchschnitt;
     }
-    public static List<Double> treeMapZuGeordnetenListe(Map<LocalDate, Double> treemap){
+    public static List<Double> treeMapZuGeordnetenDoubleListe(Map<LocalDate, Double> treemap){
         List<Double> fertige = new ArrayList<Double>();
         for (LocalDate i : treemap.keySet()) {
             fertige.add(treemap.get(i));
@@ -401,17 +510,74 @@ public class Aktien extends Application{
             e.printStackTrace();
         }
     }
-    //split
-    private static Double getSplit (String key) throws JSONException {
+    public static Integer AnzahlDatenbankeintraege(){
+        int anzahl=0;
+        Connection conn = null;
 
-        JSONObject jsonO = (JSONObject) o.get(key);
-        String split = jsonO.getString("8. split coefficient");
-        return Double.parseDouble(split);
+        try {
+            conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
+            Statement myStat = conn.createStatement();
+            String sql = "Select count(*) from "+marke +" where Datum >= '"+startdatum+"';";
+            //Select count(Wert) from tsla where Datum < '2021-04-21';
+            ResultSet reSe=myStat.executeQuery(sql);
+            if (reSe.next()) {
+                String temp = reSe.getString(1);
+                anzahl=Integer.parseInt(temp);
+            }
+
+            conn.close();
+        }
+        catch (SQLException sqle) {
+            System.out.println("SQLException: " + sqle.getMessage());
+            System.out.println("SQLState: " + sqle.getSQLState());
+            System.out.println("VendorError: " + sqle.getErrorCode());
+            sqle.printStackTrace();
+        }
+        return anzahl;
     }
-    public static void splitbereinigen(){
+    public static void treemapausgabe(){
         for (LocalDate i : aktienPreiseTreemap.keySet()) {
             aktienPreiseTreemap.replace(i, /*Splitkorrigiertes*/200.0);
         }
     }
+    public static void splitkorriegieren(){
+        int size = aktienPreiseTreemap.size();
+        Map<LocalDate, Double> tempMap = aktienPreiseTreemap;
+        double tempDouble, tempSplit;
+        for(int i=0;i<size;i++){
+            LocalDate ld = ((TreeMap<LocalDate, Double>) tempMap).lastKey();
+            double splitTemp = getSplit(ld.toString());
+            tempDouble= getWert(ld.toString());
+            tempSplit=getSplit(ld.toString());
+            aktienPreiseTreemapBerechnet.put(ld,tempDouble/split);
+            Splitmap.put(ld, tempSplit);
+            split*=splitTemp;
 
+            tempMap.remove(ld);
+        }
+    }
+    private static void CreateTableRohdaten(){
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+        }
+        catch (Exception e) {
+            System.err.println("Unable to load driver.");
+            e.printStackTrace();
+        }
+        try {
+            conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
+            Statement myStat = conn.createStatement();
+            System.out.println("* Tabelle "+marke+"_roh erstellen, falls nicht vorhanden");
+            String sql = "CREATE TABLE if not exists "+marke +"_roh"+
+                    "(Datum date, Wert double, PRIMARY KEY(Datum));";
+            myStat.executeUpdate(sql);
+
+        }
+        catch (SQLException sqle) {
+            System.out.println("SQLException: " + sqle.getMessage());
+            System.out.println("SQLState: " + sqle.getSQLState());
+            System.out.println("VendorError: " + sqle.getErrorCode());
+            sqle.printStackTrace();
+        }
+    }
 }

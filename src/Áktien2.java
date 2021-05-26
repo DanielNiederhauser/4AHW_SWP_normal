@@ -36,6 +36,8 @@ public class Áktien2 extends Application{
     //Die Liste der letzten 100 aus der API
     static Map<LocalDate, Double> aktienPreiseTreemap = new TreeMap<LocalDate, Double>();
     static Map<LocalDate, Double> aktienPreiseTreemapBerechnet = new TreeMap<LocalDate, Double>();
+    static Map<LocalDate, Double> Splitmap = new TreeMap<>();
+
     static Double gleitdurchschnitt;
     static int gleitdurchschnittAnzahl;
     static Double letzterCloseWert;
@@ -65,18 +67,12 @@ public class Áktien2 extends Application{
                 aktienPreiseTreemap.put(LocalDate.parse(temp), getWert(temp));
             }
             CreateTableRohdaten();
-            System.out.println("Rohdatenliste: "+ aktienPreiseTreemap);
-            System.out.println("Rohdatensize: "+ aktienPreiseTreemap.size());
             DatenbankeintragRohdaten();
+            System.out.println("Rohdateien fertig!");
 
             splitkorriegieren();
-            System.out.println();
             CreateTable();
-            System.out.println("Berechnete Daten: "+ aktienPreiseTreemapBerechnet);
-            System.out.println("Berechnete Daten size: "+ aktienPreiseTreemapBerechnet.size());
             Datenbankeintrag();
-
-
             System.out.println("DB Eintrag fertig");
             System.out.println();
 
@@ -91,6 +87,8 @@ public class Áktien2 extends Application{
             letztexDatums();
             System.out.println("LocaldateListeGleitdurchschnitt size: "+ LocaldateListeGleitdurchschnitt.size());
 
+            Collections.sort(LocaldateListeGleitdurchschnitt);
+
             Map<LocalDate, Double> TreemapAlleFuerGleitdurchschnitt = GetAlleWerteFuerGleitdurchschnitt();
             System.out.println("TreemapAlleFuerGleitdurchschnitt:" +TreemapAlleFuerGleitdurchschnitt.size());
             //macht eine Treemap von Werten, die später für die Berechnung der Double Liste für den Graphen gebraucht  wird
@@ -100,13 +98,14 @@ public class Áktien2 extends Application{
             //Berechnete Gleitdurchschnittliste
             JavaFXGleitdurchschnitt = GleitdurchschnittList(DoubleListeUnberechnet);
             System.out.println("JavaFXGleitdurchschnitt size: "+ JavaFXGleitdurchschnitt.size());
+            System.out.println(JavaFXGleitdurchschnitt);
             //db eintrag
             fertigeGleitdurchschnittTreemap();
 
 
 
             CreateTableGleitdurchschnitt();
-            System.out.println("Gleitdurchschnittlist"+gleitdurchschnittTreemap.keySet());
+            System.out.println("Gleitdurchschnittlist"+gleitdurchschnittTreemap);
             System.out.println("Size: "+ gleitdurchschnittTreemap.size());
             DatenbankeintragxSchnitt();
 
@@ -213,7 +212,7 @@ public class Áktien2 extends Application{
             Statement myStat = conn.createStatement();
             System.out.println("* Tabelle "+marke+" erstellen, falls nicht vorhanden");
             String sql = "CREATE TABLE if not exists "+marke +
-                    "(Datum date, Wert double, PRIMARY KEY(Datum));";
+                    "(Datum date, Wert double, Split double, PRIMARY KEY(Datum));";
             myStat.executeUpdate(sql);
 
         }
@@ -254,7 +253,7 @@ public class Áktien2 extends Application{
             Statement myStat = conn.createStatement();
 
             for (LocalDate i : aktienPreiseTreemapBerechnet.keySet()) {
-                String sql = "INSERT IGNORE INTO " + marke +" values('"+i+"',"+aktienPreiseTreemapBerechnet.get(i)+");";
+                String sql = "INSERT IGNORE INTO " + marke +" values('"+i+"',"+aktienPreiseTreemapBerechnet.get(i)+", "+Splitmap.get(i)+");";
                 myStat.execute(sql);
             }
 
@@ -287,7 +286,6 @@ public class Áktien2 extends Application{
     }
     private static void fertigeGleitdurchschnittTreemap(){
 
-        System.out.println("test"+ gleitdurchschnittTreemap.keySet());
         for(int i=0;i<AnzahlDatenbankeintraege();i++){
 
             gleitdurchschnittTreemap.put(LocaldateListeGleitdurchschnitt.get(i), JavaFXGleitdurchschnitt.get(i));
@@ -299,7 +297,7 @@ public class Áktien2 extends Application{
         try {
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
-            ResultSet reSe=myStat.executeQuery("Select * from "+marke+" order by Datum DESC limit "+(AnzahlDatenbankeintraege())+";");
+            ResultSet reSe=myStat.executeQuery("Select * from "+marke+" order by Datum DESC limit "+(AnzahlDatenbankeintraege()+1)+";");
             while(reSe.next()){
                 String zeit = reSe.getString("Datum");
 
@@ -525,7 +523,7 @@ public class Áktien2 extends Application{
         try {
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
-            String sql = "Select count(*) from "+marke +" where Datum > '"+startdatum+"';";
+            String sql = "Select count(*) from "+marke +" where Datum >= '"+startdatum+"';";
             //Select count(Wert) from tsla where Datum < '2021-04-21';
             ResultSet reSe=myStat.executeQuery(sql);
             if (reSe.next()) {
@@ -551,12 +549,14 @@ public class Áktien2 extends Application{
     public static void splitkorriegieren(){
         int size = aktienPreiseTreemap.size();
         Map<LocalDate, Double> tempMap = aktienPreiseTreemap;
-        double tempDouble;
+        double tempDouble, tempSplit;
         for(int i=0;i<size;i++){
             LocalDate ld = ((TreeMap<LocalDate, Double>) tempMap).lastKey();
             double splitTemp = getSplit(ld.toString());
              tempDouble= getWert(ld.toString());
+             tempSplit=getSplit(ld.toString());
             aktienPreiseTreemapBerechnet.put(ld,tempDouble/split);
+            Splitmap.put(ld, tempSplit);
             split*=splitTemp;
 
             tempMap.remove(ld);
