@@ -25,19 +25,19 @@ public class Backtestingsuite {
     public static void main(String[] args) {
         letztesDatumInDB = getLetztesDBDatum();
 
-            einkauf = true;
-            getWertUndDatumGroesserOderKleiner200erSchnitt();
-            einkaufen();
-            System.out.println("Erstes Datum und Wert: " + einkaufswert + " " + einkaufsdatum);
-            System.out.println("Anzahl Aktien: " + AnzahlAktien);
+        einkauf = true;
+        getWertUndDatumGroesserOderKleiner200erSchnitt();
+        einkaufen();
+        System.out.println("Erstes Datum und Wert: " + einkaufswert + " " + einkaufsdatum);
+        System.out.println("Anzahl Aktien: " + AnzahlAktien);
 
 
-            System.out.println("Einkauf: " + einkaufswert + "---" + einkaufsdatum + "---" + get200erwertEinkauf());
-            einkauf = false;
-            getWertUndDatumGroesserOderKleiner200erSchnitt();
-            System.out.println("Verkauf: " + einkaufswert + "---" + einkaufsdatum + "---" + get200erwertEinkauf());
-            Aktiendepot=AnzahlAktien*einkaufswert;
-            System.out.println("Depotwert: "+Aktiendepot);
+        System.out.println("Einkauf: " + einkaufswert + "---" + einkaufsdatum + "---" + get200erwertEinkauf());
+        einkauf = false;
+        getWertUndDatumGroesserOderKleiner200erSchnitt();
+        System.out.println("Verkauf: " + einkaufswert + "---" + einkaufsdatum + "---" + get200erwertEinkauf());
+        Aktiendepot=AnzahlAktien*einkaufswert;
+        System.out.println("Depotwert: "+Aktiendepot);
 
     }
     static void getDatumUndClosewertEinkauf(int daysToAdd){

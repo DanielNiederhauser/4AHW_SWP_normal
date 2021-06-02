@@ -3,7 +3,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class zweihunderterAnfang {
+public class zweihunderterMitProzent {
     final static String hostname = "localhost";
     final static String dbname = "java";
     final static String user = "java";
@@ -21,11 +21,12 @@ public class zweihunderterAnfang {
     static List<LocalDate> alleDatums;
 
     static int anzahlaktien;
-    static int asdf;
+    static double prozent;
     public static void main(String[] args) {
         verkaufdatum=LocalDate.of(2017,01,01);
         depot=100000.0;
         aktie="TSLA";
+        prozent=0.03;
 
         zweihunderter();
 
@@ -43,7 +44,7 @@ public class zweihunderterAnfang {
                     break;
                 }
                 zaehler++;
-            } while (closeWert > schnitt200);
+            } while (closeWert*(1+prozent) > schnitt200);
 
             System.out.println("KAUFEN: " + kaufdatum + "---" + closeWert + "---" + schnitt200);
             einkaufen();
@@ -57,7 +58,7 @@ public class zweihunderterAnfang {
                     verkaufdatum = alleDatums.get(zaehler);
                     break;
                 }
-            } while (closeWert < schnitt200);
+            } while (closeWert*(1-prozent) < schnitt200);
             System.out.println("VERKAUFEN: "+verkaufdatum + "---" + closeWert + "---" + schnitt200);
             verkaufen();
             System.out.println("Depot: "+ depot);
@@ -135,8 +136,8 @@ public class zweihunderterAnfang {
         return wert;
     }
     public static void einkaufen(){
-       anzahlaktien = (int) Math.floor(depot / closeWert);
-       depot=depot-(anzahlaktien*closeWert);
+        anzahlaktien = (int) Math.floor(depot / closeWert);
+        depot=depot-(anzahlaktien*closeWert);
     }
     public static void verkaufen(){
         depot+=anzahlaktien*closeWert;

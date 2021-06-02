@@ -3,6 +3,7 @@ import org.json.JSONObject;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.Scanner;
 
 public class BuyAndHold {
 
@@ -36,9 +37,16 @@ public class BuyAndHold {
     static boolean abbrechen=false;
 
     public static void main(String[] args) {
+        Scanner reader = new Scanner(System.in);
         letztesDatumInDB = getLetztesDBDatum();
 
         //Buy and Hold
+        boolean richtigeEingabe=false;
+        do{
+            System.out.println("Aktie: [keine Zahlen erlaubt]");
+            aktie=reader.next();
+            richtigeEingabe=istBuchstabenkette(aktie);
+        }while (istBuchstabenkette(aktie)==false);
         AktiendepotBAH=100000.0;
         //falls splitkorrigierte verwendet werden, ist splitBAH unnötig
         //splitBAH();
@@ -267,6 +275,17 @@ public class BuyAndHold {
             System.out.println("VendorError: " + sqle.getErrorCode());
             sqle.printStackTrace();
         }
+    }
+    static public boolean istBuchstabenkette(String name) {
+        char[] chars = name.toCharArray();
+
+        for (char c : chars) {
+            if(!Character.isLetter(c)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 
