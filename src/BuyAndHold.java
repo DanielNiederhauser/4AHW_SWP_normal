@@ -36,21 +36,23 @@ public class BuyAndHold {
     //true setzen wenn programm beenden soll
     static boolean abbrechen=false;
 
-    public static void main(String[] args) {
-        Scanner reader = new Scanner(System.in);
-        letztesDatumInDB = getLetztesDBDatum();
+    static Scanner reader = new Scanner(System.in);
 
-        //Buy and Hold
-        boolean richtigeEingabe=false;
+    public static void main(String[] args) {
+        System.out.println("Buy and HOLD:"+ "\n");
+        letztesDatumInDB = getLetztesDBDatum();
+        einkaufsdatumBAH=zweihunderterNormal.richtigeLocalDateEingabe("Einkaufsdatum: [2017-01-01]: ");
+        String temp;
         do{
-            System.out.println("Aktie: [keine Zahlen erlaubt]");
-            aktie=reader.next();
-            richtigeEingabe=istBuchstabenkette(aktie);
-        }while (istBuchstabenkette(aktie)==false);
-        AktiendepotBAH=100000.0;
-        //falls splitkorrigierte verwendet werden, ist splitBAH unnötig
-        //splitBAH();
-        //System.out.println("split: "+split);
+            System.out.print("Aktie: [max 5 Zeichen]");
+            temp=reader.next();
+        }while (aktieOk(temp)==false);
+        aktie = temp.toUpperCase();
+
+        AktiendepotBAH=zweihunderterNormal.doubleEingeben("Aktiendepot: [Egal ob int oder double]");
+        System.out.println();
+
+        //System.out.println(einkaufsdatumBAH+ " "+aktie+ " "+AktiendepotBAH+"\n");
         buyAndHold();
 
 
@@ -59,16 +61,15 @@ public class BuyAndHold {
     static void buyAndHold(){
         buyAndHoldKaufen();
         anzahlAktienBAH = (int) Math.floor(AktiendepotBAH / einkaufswertBAH);
-        System.out.println("Buy and HOLD: ");
-        System.out.println("Anzahl Aktien:" + anzahlAktienBAH);
+        //System.out.println("Anzahl Aktien:" + anzahlAktienBAH);
         Aktiendepot-=anzahlAktienBAH*einkaufswertBAH;
         System.out.println("Einkaufswert: "+ einkaufswertBAH+ " Aktienanzahl: "+ anzahlAktienBAH+
                 " Aktiendepot: "+ AktiendepotBAH);
 
         buyAndHoldVerkaufen();
-        AktiendepotBAH=anzahlAktienBAH*verkaufswertBAH;
-        System.out.println("Verkaufswert: "+ verkaufswertBAH+ " Datum: "+verkaufsdatumBAH+ " Aktiendepot: "+ AktiendepotBAH);
-        System.out.println("Buy and hold ende" + "\n");
+        AktiendepotBAH+=anzahlAktienBAH*verkaufswertBAH;
+        System.out.println("Verkaufswert: "+ verkaufswertBAH+ " Datum: "+verkaufsdatumBAH+ " Aktiendepot: "+ AktiendepotBAH + "\n");
+        System.out.println("Buy and hold ende");
     }
     //Buy and Hold
     static void buyAndHoldKaufen(){
@@ -276,17 +277,14 @@ public class BuyAndHold {
             sqle.printStackTrace();
         }
     }
-    static public boolean istBuchstabenkette(String name) {
-        char[] chars = name.toCharArray();
 
-        for (char c : chars) {
-            if(!Character.isLetter(c)) {
-                return false;
-            }
+    static public boolean aktieOk(String aktie){
+        if(aktie.length()>5){
+            return false;
         }
-
         return true;
     }
+
 
 
 

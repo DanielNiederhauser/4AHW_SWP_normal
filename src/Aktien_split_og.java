@@ -1,29 +1,31 @@
-import javafx.application.Application;
-import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.Scene;
-import javafx.scene.SnapshotParameters;
-import javafx.scene.chart.*;
-import javafx.scene.image.WritableImage;
-import javafx.stage.Stage;
-import org.apache.commons.io.IOUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import javax.imageio.ImageIO;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.sql.*;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.List;
+
+import javafx.application.Application;
+        import javafx.embed.swing.SwingFXUtils;
+        import javafx.scene.Scene;
+        import javafx.scene.SnapshotParameters;
+        import javafx.scene.chart.*;
+        import javafx.scene.image.WritableImage;
+        import javafx.stage.Stage;
+        import org.apache.commons.io.IOUtils;
+        import org.json.JSONException;
+        import org.json.JSONObject;
+
+        import javax.imageio.ImageIO;
+        import java.io.BufferedReader;
+        import java.io.File;
+        import java.io.FileReader;
+        import java.io.IOException;
+        import java.net.URL;
+        import java.nio.charset.Charset;
+        import java.sql.*;
+        import java.time.LocalDate;
+        import java.util.*;
+        import java.util.List;
 
 //Primarykey muss Datum sein
 
-public class Áktien2 extends Application{
+public class Aktien_split_og extends Application{
 
     final static String hostname = "localhost";
     final static String dbname = "java";
@@ -53,6 +55,7 @@ public class Áktien2 extends Application{
         String apiKey = ladeKey("src/APIKey.txt");
 
         for(int a=0;a<aktien.size();a++){
+            dates.clear();
             marke = aktien.get(a);
             String URL = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=" + marke + "&outputsize=full&apikey="+apiKey;
             JSONObject json = new JSONObject(IOUtils.toString(new URL(URL), Charset.forName("UTF-8")));
@@ -74,39 +77,32 @@ public class Áktien2 extends Application{
             CreateTable();
             Datenbankeintrag();
             System.out.println("DB Eintrag fertig");
-            System.out.println();
 
 
-                        /*System.out.println("Table ausgeben?");
-            if (reader.next().equals("ja")) {
-                Datenbankausgabe();
-            }*/
-
-            //Gleitdurchschnitt(gleitdurchschnittAnzahl);
 
             letztexDatums();
-            System.out.println("LocaldateListeGleitdurchschnitt size: "+ LocaldateListeGleitdurchschnitt.size());
+            //System.out.println("LocaldateListeGleitdurchschnitt size: "+ LocaldateListeGleitdurchschnitt.size());
 
             Collections.sort(LocaldateListeGleitdurchschnitt);
 
             Map<LocalDate, Double> TreemapAlleFuerGleitdurchschnitt = GetAlleWerteFuerGleitdurchschnitt();
-            System.out.println("TreemapAlleFuerGleitdurchschnitt:" +TreemapAlleFuerGleitdurchschnitt.size());
+            //System.out.println("TreemapAlleFuerGleitdurchschnitt:" +TreemapAlleFuerGleitdurchschnitt.size());
             //macht eine Treemap von Werten, die später für die Berechnung der Double Liste für den Graphen gebraucht  wird
             //macht eine Double Liste wo die Werte in der richtigen Reihenfolge (dem Datum nach) sind
             List<Double> DoubleListeUnberechnet = treeMapZuGeordnetenDoubleListe(TreemapAlleFuerGleitdurchschnitt);
-            System.out.println("DoublelisteUnberechnet size: "+ DoubleListeUnberechnet.size());
+            //System.out.println("DoublelisteUnberechnet size: "+ DoubleListeUnberechnet.size());
             //Berechnete Gleitdurchschnittliste
             JavaFXGleitdurchschnitt = GleitdurchschnittList(DoubleListeUnberechnet);
-            System.out.println("JavaFXGleitdurchschnitt size: "+ JavaFXGleitdurchschnitt.size());
-            System.out.println(JavaFXGleitdurchschnitt);
+            //System.out.println("JavaFXGleitdurchschnitt size: "+ JavaFXGleitdurchschnitt.size());
+            //System.out.println(JavaFXGleitdurchschnitt);
             //db eintrag
             fertigeGleitdurchschnittTreemap();
 
 
 
             CreateTableGleitdurchschnitt();
-            System.out.println("Gleitdurchschnittlist"+gleitdurchschnittTreemap);
-            System.out.println("Size: "+ gleitdurchschnittTreemap.size());
+            //System.out.println("Gleitdurchschnittlist"+gleitdurchschnittTreemap);
+            //System.out.println("Size: "+ gleitdurchschnittTreemap.size());
             DatenbankeintragxSchnitt();
 
             //Liste für normalen Graphen also den, wo nicht der x Schnitt ist
@@ -181,7 +177,7 @@ public class Áktien2 extends Application{
         //System.out.print("Von welchem Datum rückwirkend? [1999-10-01]");
         //startdatum = LocalDate.parse(reader.next());
 
-        startdatum=LocalDate.of(2017,01,01);
+        startdatum=LocalDate.of(2015,01,01);
         if(startdatum==null){
             startdatum=LocalDate.now();
         }
@@ -193,6 +189,7 @@ public class Áktien2 extends Application{
         String Wert = jsonO.getString("4. close");
         return Double.parseDouble(Wert);
     }
+
     private static Double getSplit (String key) throws JSONException {
 
         JSONObject jsonO = (JSONObject) o.get(key);
@@ -284,6 +281,7 @@ public class Áktien2 extends Application{
             sqle.printStackTrace();
         }
     }
+
     private static void fertigeGleitdurchschnittTreemap(){
 
         for(int i=0;i<AnzahlDatenbankeintraege();i++){
@@ -553,8 +551,8 @@ public class Áktien2 extends Application{
         for(int i=0;i<size;i++){
             LocalDate ld = ((TreeMap<LocalDate, Double>) tempMap).lastKey();
             double splitTemp = getSplit(ld.toString());
-             tempDouble= getWert(ld.toString());
-             tempSplit=getSplit(ld.toString());
+            tempDouble= getWert(ld.toString());
+            tempSplit=getSplit(ld.toString());
             aktienPreiseTreemapBerechnet.put(ld,tempDouble/split);
             Splitmap.put(ld, tempSplit);
             split*=splitTemp;

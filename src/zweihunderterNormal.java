@@ -6,7 +6,7 @@ import java.time.format.ResolverStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class zweihunderterMitProzent {
+public class zweihunderterNormal {
     final static String hostname = "localhost";
     final static String dbname = "java";
     final static String user = "java";
@@ -64,12 +64,12 @@ public class zweihunderterMitProzent {
                     if(alarm==true) break;
                     schnitt200 = get200(zaehler);
                     if(alarm==true) break;
-                    if (closeWert*1.03 < schnitt200) {
+                    if (closeWert < schnitt200) {
                         kaufdatum = alleDatums.get(zaehler);
                         break;
                     }
                     zaehler++;
-                } while (closeWert*1.03 > schnitt200);
+                } while (closeWert > schnitt200);
                 if(alarm) break;
 
 
@@ -86,11 +86,11 @@ public class zweihunderterMitProzent {
                     if(alarm)break;
                     schnitt200 = get200(zaehler);
                     if(alarm)break;
-                    if (closeWert*0.97 > schnitt200) {
+                    if (closeWert > schnitt200) {
                         verkaufdatum = alleDatums.get(zaehler);
                         break;
                     }
-                } while (closeWert*0.95 < schnitt200);
+                } while (closeWert < schnitt200);
                 if(alarm)break;
                 verkaufen();
                 //Hilfe fürs debuggen
@@ -109,8 +109,8 @@ public class zweihunderterMitProzent {
         try {
             conn=DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
-            System.out.println("* Tabelle 200strategie3Prozent erstellen, falls nicht vorhanden");
-            String sql = "CREATE TABLE if not exists 200strategie3Prozent(Datum date, Aktie varchar(10), Kaufen boolean, Anzahl Integer, Depot double, PRIMARY KEY(Datum));";
+            System.out.println("* Tabelle 200strategie erstellen, falls nicht vorhanden");
+            String sql = "CREATE TABLE if not exists 200strategie(Datum date, Aktie varchar(10), Kaufen boolean, Anzahl Integer, Depot double, PRIMARY KEY(Datum));";
             myStat.executeUpdate(sql);
 
         }
@@ -216,7 +216,7 @@ public class zweihunderterMitProzent {
             Statement myStat = conn.createStatement();
 
 
-            String sql = "INSERT IGNORE INTO 200strategie3Prozent values('"+ld+"','"+aktie+"',"+0+","+anzahlaktien+","+depot+");";
+            String sql = "INSERT IGNORE INTO 200strategie values('"+ld+"','"+aktie+"',"+0+","+anzahlaktien+","+depot+");";
             //System.out.println(sql);
             myStat.execute(sql);
 
@@ -245,7 +245,7 @@ public class zweihunderterMitProzent {
             Statement myStat = conn.createStatement();
 
 
-            String sql = "INSERT IGNORE INTO 200strategie3Prozent values('"+temp+"','"+aktie+"',"+oansOdaNull+","+anzahlaktien+","+depot+");";
+            String sql = "INSERT IGNORE INTO 200strategie values('"+temp+"','"+aktie+"',"+oansOdaNull+","+anzahlaktien+","+depot+");";
             //System.out.println(sql);
             myStat.execute(sql);
 
@@ -264,7 +264,7 @@ public class zweihunderterMitProzent {
         try {
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
-            String sql = "select depot from 200strategie3Prozent where aktie='"+aktie+"' order by Datum desc limit 1;";
+            String sql = "select depot from 200strategie where aktie='"+aktie+"' order by Datum desc limit 1;";
             ResultSet reSe=myStat.executeQuery(sql);
             if (reSe.next()) {
                 System.out.println("Enddepot "+aktie+": "+(reSe.getDouble("Depot"))+"\n");
@@ -285,7 +285,7 @@ public class zweihunderterMitProzent {
         try {
             conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
-            String sql = "Select * from 200strategie3Prozent where aktie='"+aktie+"' order by Datum desc limit 1;";
+            String sql = "Select * from 200strategie where aktie='"+aktie+"' order by Datum desc limit 1;";
             ResultSet reSe=myStat.executeQuery(sql);
 
             if(reSe.next()){
@@ -314,7 +314,7 @@ public class zweihunderterMitProzent {
 
             Connection conn = DriverManager.getConnection("jdbc:mysql://"+hostname+"/"+dbname+"?user="+user+"&password="+password+"&serverTimezone=UTC");
             Statement myStat = conn.createStatement();
-            String sql = "Delete from 200strategie3Prozent where Datum='"+ld+"' and aktie='"+aktie+"';";
+            String sql = "Delete from 200strategie where Datum='"+ld+"' and aktie='"+aktie+"';";
             //System.out.println(sql);
             myStat.execute(sql);
 

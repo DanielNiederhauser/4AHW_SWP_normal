@@ -53,6 +53,7 @@ public class Aktien extends Application{
         String apiKey = ladeKey("src/APIKey.txt");
 
         for(int a=0;a<aktien.size();a++){
+            dates.clear();
             marke = aktien.get(a);
             String URL = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=" + marke + "&outputsize=full&apikey="+apiKey;
             JSONObject json = new JSONObject(IOUtils.toString(new URL(URL), Charset.forName("UTF-8")));
@@ -70,11 +71,15 @@ public class Aktien extends Application{
             DatenbankeintragRohdaten();
             System.out.println("Rohdateien fertig!");
 
-            splitkorriegieren();
+
+            //splitkorriegieren();
             CreateTable();
+            for (int i = 0; i < dates.size(); i++) {
+                String temp = dates.get(i);
+                aktienPreiseTreemapBerechnet.put(LocalDate.parse(temp), getSplitkorrigiert(temp));
+            }
             Datenbankeintrag();
             System.out.println("DB Eintrag fertig");
-            System.out.println();
 
 
 
@@ -138,6 +143,7 @@ public class Aktien extends Application{
             lineChart.getData().add(series1);
             lineChart.setCreateSymbols(false);
 
+
             if(JavaFXGleitdurchschnitt.get(JavaFXGleitdurchschnitt.size()-1)>getLastCloseWert()){
                 scene.getStylesheets().add("red.css");
             }
@@ -175,7 +181,7 @@ public class Aktien extends Application{
         //System.out.print("Von welchem Datum rückwirkend? [1999-10-01]");
         //startdatum = LocalDate.parse(reader.next());
 
-        startdatum=LocalDate.of(2017,01,01);
+        startdatum=LocalDate.of(2015,01,01);
         if(startdatum==null){
             startdatum=LocalDate.now();
         }
@@ -185,6 +191,12 @@ public class Aktien extends Application{
 
         JSONObject jsonO = (JSONObject) o.get(key);
         String Wert = jsonO.getString("4. close");
+        return Double.parseDouble(Wert);
+    }
+    private static double getSplitkorrigiert (String key) throws JSONException {
+
+        JSONObject jsonO = (JSONObject) o.get(key);
+        String Wert = jsonO.getString("5. adjusted close");
         return Double.parseDouble(Wert);
     }
     private static Double getSplit (String key) throws JSONException {
@@ -277,6 +289,10 @@ public class Aktien extends Application{
             System.out.println("VendorError: " + sqle.getErrorCode());
             sqle.printStackTrace();
         }
+    }
+
+    private static void fillBerechnete(){
+
     }
     private static void fertigeGleitdurchschnittTreemap(){
 
@@ -450,7 +466,7 @@ public class Aktien extends Application{
         }
         return fertige;
     }
-    private static List<String> ladeDatei(String datName) {
+    public static List<String> ladeDatei(String datName) {
         List<String> fertige = new ArrayList<>();
         File file = new File(datName);
 
