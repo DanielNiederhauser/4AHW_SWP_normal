@@ -1,0 +1,17 @@
+Die Backtesting-Aufgabe besteht aus 3 Teilen:
+Der erste realisiert die buy and hold Taktik: Man kauft zu einem bestimmten Zeitpunkt eine Aktie und verkauft sie am letzten Tag (also z.b. heute oder gestern)
+Die zweite funktioniert folgend:
+Man geht zu einem beliebigen Zeitpunkt in der vergangenheit, füllt sein Depot mit einem selbst ausgesuchten Geldbetrag, wählt die Aktie (wobei durch letztes Update auch mehrere 
+mölich sind, die sich in von der Datei "AktienListe" befinden). Dann kauft man immer ein, wenn der close Wert eines Datums über dem zugehörigen 200erschnitt ist.
+Verkauft wird, wenn der Closewert unter dem zugehörigen 200erschnitt ist. Das Ganze wird so lange durchgeführt, bis man am aktuellen Datum ist. Dann wird noch die 
+prozentuale Veränderung berechnet und ausgegeben.
+
+Die dritte Strategie war die 200er 3%. Sie funktioniert gleich, wie die zweite nur dass nicht der Closewert direkt mit dem 200erschnitt verglichen wird, sondern
+3% zu/abgezogen werden. -> größere "Kaufsspanne"
+
+Die letzte Strategie ist die "falsche 200erstrategie". Bei ihr kauft man, wenn der Closewert kleiner als der 200erschnitt ist und verkauft wenn der Closewert größer ist.
+
+Ergebnis: Wie man in /src/Bilder sieht, haben die Strategien alle Ihre Vor- und Nachteile.
+
+Buy and Hold zum Beispiel ist sehr gut, wenn eine Aktie plötzlich viel an Wert gewinn.
+Durchschnittlich hingegen ist die normale 200erstrategie die beste Lösung.
