@@ -18,10 +18,9 @@ public class BuyAndHold {
     static double einkaufswertBAH, verkaufswertBAH;
     static int anzahlAktienBAH;
     static int split;
-    //200er
 
     static double Aktiendepot;
-    static String aktie="TSLA";
+    static String aktie;
     static Double einkaufswert = null;
     static LocalDate einkaufsdatum =null;
     static int AnzahlAktien;
@@ -40,7 +39,6 @@ public class BuyAndHold {
 
     public static void main(String[] args) {
         System.out.println("Buy and HOLD:"+ "\n");
-        letztesDatumInDB = getLetztesDBDatum();
         einkaufsdatumBAH=zweihunderterNormal.richtigeLocalDateEingabe("Einkaufsdatum: [2017-01-01]: ");
         String temp;
         do{
@@ -65,10 +63,12 @@ public class BuyAndHold {
         Aktiendepot-=anzahlAktienBAH*einkaufswertBAH;
         System.out.println("Einkaufswert: "+ einkaufswertBAH+ " Aktienanzahl: "+ anzahlAktienBAH+
                 " Aktiendepot: "+ AktiendepotBAH);
+        double temp = AktiendepotBAH;
 
         buyAndHoldVerkaufen();
         AktiendepotBAH+=anzahlAktienBAH*verkaufswertBAH;
         System.out.println("Verkaufswert: "+ verkaufswertBAH+ " Datum: "+verkaufsdatumBAH+ " Aktiendepot: "+ AktiendepotBAH + "\n");
+        System.out.println("Prozentuale Veränderung: "+ AktiendepotBAH/temp*100);
         System.out.println("Buy and hold ende");
     }
     //Buy and Hold

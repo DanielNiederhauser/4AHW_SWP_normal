@@ -181,7 +181,7 @@ public class Aktien extends Application{
         //System.out.print("Von welchem Datum rückwirkend? [1999-10-01]");
         //startdatum = LocalDate.parse(reader.next());
 
-        startdatum=LocalDate.of(2015,01,01);
+        startdatum=LocalDate.of(2012,01,01);
         if(startdatum==null){
             startdatum=LocalDate.now();
         }

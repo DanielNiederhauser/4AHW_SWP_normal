@@ -29,6 +29,8 @@ public class falscheStrategie {
     static boolean alarm=false;
     static LocalDate tempVerk;
     static Scanner reader = new Scanner(System.in);
+    static double depotTemp;
+
     public static void main(String[] args) {
         conn = null;;
         boolean willEingabe=true;
@@ -47,6 +49,8 @@ public class falscheStrategie {
         List<String> aktien = Aktien.ladeDatei("src/AktienListe.txt");
 
         for(int a=0;a<aktien.size();a++) {
+            depotTemp=0.0;
+
             depot=gesamtDepot/aktien.size();
 
 
@@ -57,6 +61,7 @@ public class falscheStrategie {
 
             alleDatums = getAlleDatums();
             System.out.println("Startdepot "+ aktie+": "+depot);
+            depotTemp=depot;
 
             do {
                 do {
@@ -267,7 +272,9 @@ public class falscheStrategie {
             String sql = "select depot from FalscheStrategie where aktie='"+aktie+"' order by Datum desc limit 1;";
             ResultSet reSe=myStat.executeQuery(sql);
             if (reSe.next()) {
-                System.out.println("Enddepot "+aktie+": "+(reSe.getDouble("Depot"))+"\n");
+                System.out.println("Enddepot "+aktie+": "+(reSe.getDouble("Depot")));
+                System.out.println("Prozentuelle Veränderung: "+ (reSe.getDouble("Depot")/depotTemp*100+"\n"));
+
             }
             conn.close();
         }
